@@ -1,33 +1,27 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState, useEffect } from 'react';
-import {
-  IOffreC, DocumentStatus,
-  ICategory
-} from '../../types';
-import { useEntity } from '../../contexts/EntityContext.tsx';
-import { useClient } from '../../contexts/ClientContext.tsx';
-import { useSite } from '../../contexts/SiteContext.tsx';
-
-
-import { Info, AlertCircle, Check, X } from 'lucide-react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../common/CustomCard.tsx';
-import { Alert, AlertDescription } from '../../common/CustomAlert.tsx';
-import { useCategory } from '../../hooks/useCategory.tsx';
-import { useProduct } from '../../hooks/useProduct.tsx';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Info, AlertCircle, Check, X, Plus, Loader2 } from 'lucide-react';
+import { useEntity } from '../../contexts/EntityContext';
+import { useClient } from '../../contexts/ClientContext';
+import { useCategory } from '../../hooks/useCategory';
+import { useProduct } from '../../hooks/useProduct';
+import { useSite } from '../../contexts/SiteContext';
+import { DocumentStatus, IOffre, IOffreC } from '../../types';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../common/CustomCard';
+import { Alert, AlertDescription } from '../../common/CustomAlert';
 
 interface OfferFormProps {
-  initialData?: Partial<IOffreC>;
+  initialData?: Partial<IOffre>;
   onSubmit: (offre: IOffreC) => void;
   onCancel: () => void;
   isEditing?: boolean;
 }
 
 const OfferForm: React.FC<OfferFormProps> = ({
-                                               initialData,
-                                               onSubmit,
-                                               onCancel,
-                                               isEditing = false,
-                                             }) => {
+  initialData,
+  onSubmit,
+  onCancel,
+  isEditing = false,
+}) => {
   const { entities } = useEntity();
   const { clients } = useClient();
   const { categories } = useCategory();
@@ -35,53 +29,99 @@ const OfferForm: React.FC<OfferFormProps> = ({
   const { sites } = useSite();
 
   const [formData, setFormData] = useState<Partial<IOffreC>>({
-    entity: initialData?.entity,
+    entity: initialData?.entity?.id,
     reference: initialData?.reference || '',
-    client: initialData?.client,
+    client: initialData?.client?.id,
     date_creation: initialData?.date_creation || new Date().toISOString(),
     statut: initialData?.statut || DocumentStatus.BROUILLON,
     doc_type: initialData?.doc_type || 'OFF',
     sequence_number: initialData?.sequence_number || 0,
-    category: initialData?.category,
-    produit: initialData?.produit,
-    date_modification: initialData?.date_modification || new Date().toISOString(),
+    produit: initialData?.produit?.map(p => p.id) || [],
+    date_modification: new Date().toISOString(),
     date_validation: initialData?.date_validation || null,
-    sites: initialData?.sites || [],
+    sites: initialData?.sites?.map(s => s.id) || [],
   });
 
+  const [category, setCategory] = useState<number | null>(null);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const filteredProducts = useMemo(() => {
+    if (!category) return products;
+    return products.filter(product => product.category.id === category);
+  }, [products, category]);
 
   useEffect(() => {
-    setFormData((prev) => ({ ...prev, ...initialData }));
-  }, [initialData]);
+      if (initialData) {
+        setFormData(prev => ({
+          ...prev,
+          entity: initialData.entity?.id,
+          reference: initialData.reference,
+          client: initialData.client?.id,
+          date_creation: initialData.date_creation,
+          statut: initialData.statut,
+          doc_type: initialData.doc_type,
+          sequence_number: initialData.sequence_number,
+          produit: initialData.produit?.map(p => p.id) || [],
+          date_modification: new Date().toISOString(),
+          date_validation: initialData.date_validation,
+          sites: initialData.sites?.map(s => s.id) || [],
+        }));
+      }
+    }, [initialData]);
 
   const handleSelectChange = (
     e: React.ChangeEvent<HTMLSelectElement>,
-    key: keyof IOffreC,
-    collection: any[],
+    key: keyof IOffreC
   ) => {
-    const selectedItem = collection.find((item) => item.id === Number(e.target.value));
-    if (selectedItem) {
-      setFormData((prev) => ({ ...prev, [key]: selectedItem.id }));
+    const selectedId = Number(e.target.value);
+    if (selectedId) {
+      setFormData((prev) => ({ ...prev, [key]: selectedId }));
       setErrors((prev) => ({ ...prev, [key]: '' }));
     }
   };
 
-  const handleSiteSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedSite = sites.find((site) => site.id === Number(e.target.value));
-    if (selectedSite && !formData.sites?.includes(selectedSite.id)) {
+  const handleCategorySelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = Number(e.target.value);
+    setCategory(selectedId || null);
+  };
+
+  const handleAddProduct = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = Number(e.target.value);
+    if (selectedId && !formData.produit?.includes(selectedId)) {
       setFormData((prev) => ({
         ...prev,
-        sites: [...(prev.sites || []), selectedSite.id],
+        produit: [...(prev.produit || []), selectedId],
       }));
+      setErrors(prev => ({ ...prev, produit: '' }));
     }
+    e.target.value = '';
+  };
+
+  const handleRemoveProduct = (productId: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      produit: prev.produit?.filter((id) => id !== productId) || [],
+    }));
+  };
+
+  const handleSiteSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedId = Number(e.target.value);
+    if (selectedId && !formData.sites?.includes(selectedId)) {
+      setFormData((prev) => ({
+        ...prev,
+        sites: [...(prev.sites || []), selectedId],
+      }));
+      setErrors(prev => ({ ...prev, sites: '' }));
+    }
+    e.target.value = '';
   };
 
   const handleRemoveSite = (siteId: number) => {
     setFormData((prev) => ({
       ...prev,
-      sites: prev.sites?.filter((site) => site !== siteId) || [],
+      sites: prev.sites?.filter((id) => id !== siteId) || [],
     }));
   };
 
@@ -90,8 +130,8 @@ const OfferForm: React.FC<OfferFormProps> = ({
 
     if (!data.entity) newErrors.entity = "L'entité est requise";
     if (!data.client) newErrors.client = "Le client est requis";
-    if (!data.category) newErrors.category = "La catégorie est requise";
-    if (!data.produit) newErrors.produit = "Le produit est requis";
+    if (!data.produit?.length) newErrors.produit = "Au moins un produit est requis";
+    if (!data.sites?.length) newErrors.sites = "Au moins un site est requis";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -100,35 +140,49 @@ const OfferForm: React.FC<OfferFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateFormData(formData)) {
+      setIsSubmitting(true);
       try {
-        await onSubmit(formData as IOffreC);
+        const submissionData = {
+          ...formData,
+          date_modification: new Date().toISOString(),
+        };
+        await onSubmit(submissionData as IOffreC);
         setShowSuccessMessage(true);
         setTimeout(() => setShowSuccessMessage(false), 3000);
       } catch (error) {
-        console.log('erreur:', error)
+        console.error('Error:', error);
         setErrors({ submit: "Une erreur est survenue lors de la soumission" });
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
 
+  const getProductName = (productId: number) => {
+    return products.find(p => p.id === productId)?.name || 'Produit inconnu';
+  };
+
   const getSiteName = (siteId: number) => {
-    const site = sites.find(s => s.id === siteId);
-    return site?.nom || 'Site inconnu';
+    return sites.find(s => s.id === siteId)?.nom || 'Site inconnu';
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-gray-800">
+    <Card className="w-full max-w-6xl  bg-white shadow-lg">
+      <CardHeader className="border-b border-gray-100">
+        <CardTitle className="text-2xl font-bold text-gray-800 flex items-center gap-2">
           {isEditing ? 'Modifier l\'offre' : 'Nouvelle offre'}
+          {isEditing && (
+            <span className="text-sm font-normal px-2 py-1 bg-blue-50 text-blue-600 rounded">
+              En édition
+            </span>
+          )}
         </CardTitle>
-        
       </CardHeader>
 
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 py-6">
           {showSuccessMessage && (
-            <Alert className="mb-4 bg-green-50 border-green-200">
+            <Alert className="mb-6 bg-green-50 border-green-200 rounded-lg">
               <Check className="w-4 h-4 text-green-500" />
               <AlertDescription className="text-green-700">
                 {isEditing ? 'Offre mise à jour avec succès !' : 'Offre créée avec succès !'}
@@ -137,18 +191,16 @@ const OfferForm: React.FC<OfferFormProps> = ({
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Entity Selection */}
             <div className="space-y-2">
-              <label htmlFor="entity" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                 Entité <Info className="w-4 h-4 text-gray-400" />
               </label>
               <select
-                id="entity"
                 value={formData.entity || ''}
-                onChange={(e) => handleSelectChange(e, 'entity', entities)}
-                className={`w-full rounded border ${errors.entity ? 'border-red-300 bg-red-50' : 'border-gray-300'} 
-                          focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-colors`}
-                required
+                onChange={(e) => handleSelectChange(e, 'entity')}
+                className={`w-full h-10 px-3 rounded-md border ${
+                  errors.entity ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                } focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all`}
               >
                 <option value="">Sélectionnez une entité</option>
                 {entities?.map((ent) => (
@@ -156,25 +208,23 @@ const OfferForm: React.FC<OfferFormProps> = ({
                 ))}
               </select>
               {errors.entity && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
+                <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
                   <AlertCircle className="w-4 h-4" />
                   {errors.entity}
                 </p>
               )}
             </div>
 
-            {/* Client Selection */}
             <div className="space-y-2">
-              <label htmlFor="client" className="text-sm font-medium text-gray-700">
+              <label className="text-sm font-medium text-gray-700">
                 Client
               </label>
               <select
-                id="client"
                 value={formData.client || ''}
-                onChange={(e) => handleSelectChange(e, 'client', clients)}
-                className={`w-full rounded border ${errors.client ? 'border-red-300 bg-red-50' : 'border-gray-300'} 
-                          focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-colors`}
-                required
+                onChange={(e) => handleSelectChange(e, 'client')}
+                className={`w-full h-10 px-3 rounded-md border ${
+                  errors.client ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                } focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all`}
               >
                 <option value="">Sélectionnez un client</option>
                 {clients?.map((cli) => (
@@ -182,122 +232,161 @@ const OfferForm: React.FC<OfferFormProps> = ({
                 ))}
               </select>
               {errors.client && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
+                <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
                   <AlertCircle className="w-4 h-4" />
                   {errors.client}
                 </p>
               )}
             </div>
-
-            {/* Category Selection */}
-            <div className="space-y-2">
-              <label htmlFor="category" className="text-sm font-medium text-gray-700">
-                Catégorie
-              </label>
-              <select
-                id="category"
-                value={formData.category || ''}
-                onChange={(e) => handleSelectChange(e, 'category', categories)}
-                className={`w-full rounded border ${errors.category ? 'border-red-300 bg-red-50' : 'border-gray-300'} 
-                          focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-colors`}
-                required
-              >
-                <option value="">Sélectionnez une catégorie</option>
-                {categories?.map((cat: ICategory) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))}
-              </select>
-              {errors.category && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.category}
-                </p>
-              )}
-            </div>
-
-            {/* Product Selection */}
-            <div className="space-y-2">
-              <label htmlFor="product" className="text-sm font-medium text-gray-700">
-                Produit
-              </label>
-              <select
-                id="product"
-                value={formData.produit || ''}
-                onChange={(e) => handleSelectChange(e, 'produit', products)}
-                className={`w-full rounded border ${errors.produit ? 'border-red-300 bg-red-50' : 'border-gray-300'} 
-                          focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-colors`}
-                required
-              >
-                <option value="">Sélectionnez un produit</option>
-                {products?.map((prod) => (
-                  <option key={prod.id} value={prod.id}>{prod.name}</option>
-                ))}
-              </select>
-              {errors.produit && (
-                <p className="text-sm text-red-500 flex items-center gap-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.produit}
-                </p>
-              )}
-            </div>
           </div>
 
-          {/* Sites Section */}
-          <div className="space-y-4 mt-6">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              Catégorie <Info className="w-4 h-4 text-gray-400" />
+            </label>
+            <select
+              value={category || ''}
+              onChange={handleCategorySelectChange}
+              className="w-full h-10 px-3 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
+            >
+              <option value="">Toutes les catégories</option>
+              {categories?.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <label htmlFor="sites" className="text-sm font-medium text-gray-700">
-                Sites associés
+              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                Produits
+                {category && (
+                  <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
+                    Filtrés par catégorie
+                  </span>
+                )}
               </label>
+              <Plus className="w-4 h-4 text-gray-400" />
             </div>
 
             <select
-              id="sites"
-              onChange={handleSiteSelection}
-              className="w-full rounded border border-gray-300 focus:ring-2 focus:ring-blue-200
-                       focus:border-blue-400 transition-colors"
+              onChange={handleAddProduct}
+              className="w-full h-10 px-3 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all disabled:bg-gray-50 disabled:text-gray-500"
+              disabled={!category}
             >
-              <option value="">Ajouter un site</option>
-              {sites?.map((site) => (
-                <option key={site.id} value={site.id}>{site.nom}</option>
+              <option value="">
+                {category ? 'Ajouter un produit' : 'Veuillez d\'abord sélectionner une catégorie'}
+              </option>
+              {filteredProducts.map((prod) => (
+                <option 
+                  key={prod.id} 
+                  value={prod.id}
+                  disabled={formData.produit?.includes(prod.id)}
+                >
+                  {prod.name}
+                </option>
               ))}
             </select>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
-              {formData.sites?.map((siteId) => (
-                <div key={siteId}
-                     className="flex items-center justify-between p-2 bg-gray-50 rounded border
-                              border-gray-200 hover:border-gray-300 transition-colors">
-                  <span className="text-sm text-gray-700">{getSiteName(siteId)}</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto p-2">
+              {formData.produit?.map((productId) => (
+                <div 
+                  key={productId} 
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200 group hover:border-gray-300 transition-all"
+                >
+                  <span className="text-sm text-gray-700">{getProductName(productId)}</span>
                   <button
                     type="button"
-                    onClick={() => handleRemoveSite(siteId)}
-                    className="text-gray-400 hover:text-red-500 transition-colors"
+                    onClick={() => handleRemoveProduct(productId)}
+                    className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all"
                   >
                     <X className="w-4 h-4" />
                   </button>
                 </div>
               ))}
             </div>
+            {errors.produit && (
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.produit}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium text-gray-700">
+                Sites associés
+              </label>
+              <Plus className="w-4 h-4 text-gray-400" />
+            </div>
+
+            <select
+              onChange={handleSiteSelection}
+              className="w-full h-10 px-3 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
+            >
+              <option value="">Ajouter un site</option>
+              {sites?.map((site) => (
+                <option 
+                  key={site.id} 
+                  value={site.id}
+                  disabled={formData.sites?.includes(site.id)}
+                >
+                  {site.nom}
+                </option>
+              ))}
+            </select>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto p-2">
+              {formData.sites?.map((siteId) => (
+                <div 
+                  key={siteId} 
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200 group hover:border-gray-300 transition-all"
+                >
+                  <span className="text-sm text-gray-700">{getSiteName(siteId)}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveSite(siteId)}
+                    className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            {errors.sites && (
+              <p className="text-sm text-red-500 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                {errors.sites}
+              </p>
+            )}
           </div>
         </form>
       </CardContent>
 
-      <CardFooter className="flex justify-between mt-6 pt-4 border-t border-gray-200">
+      <CardFooter className="flex justify-between py-4 px-6 border-t border-gray-100">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-gray-600 bg-gray-100 rounded hover:bg-gray-200
-                   transition-colors focus:outline-none focus:ring-2 focus:ring-gray-200"
+          className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-all focus:ring-2 focus:ring-gray-200"
+          disabled={isSubmitting}
         >
           Annuler
         </button>
         <button
           type="submit"
           onClick={handleSubmit}
-          className="px-4 py-2 text-white bg-blue-500 rounded hover:bg-blue-600
-                   transition-colors focus:outline-none focus:ring-2 focus:ring-blue-200"
+          disabled={isSubmitting}
+          className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-all focus:ring-2 focus:ring-blue-200 disabled:bg-blue-300 flex items-center gap-2"
         >
-          {isEditing ? 'Mettre à jour' : 'Créer l\'offre'}
+          {isSubmitting ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              {initialData ? 'Mise à jour...' : 'Création...'}
+            </>
+          ) : (
+            initialData ? 'Mettre à jour' : 'Créer l\'offre'
+          )}
         </button>
       </CardFooter>
     </Card>

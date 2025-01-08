@@ -1,16 +1,21 @@
-import React, { useState } from 'react';
-import OffresTable from './offres_table';
+import React, { useEffect, useState } from 'react';
 import { Modal } from '../../components/ui/modal';
 import OfferForm from '../../components/forms/OfferForm';
 import { Plus } from 'lucide-react';
 import { useOffre } from '../../contexts/OffreProvider';
 import { IOffreC } from '../../types';
+import OffersList from './of';
 
 const Offres: React.FC = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
         const [editingOffre, setEditingOffre] = useState(null);
-        const {addOffre, fetchOffres} = useOffre();
+        const {offres, addOffre, fetchOffres} = useOffre();
+
+        useEffect(() => {
+            fetchOffres();
+        }
+        , [fetchOffres]);
     
         const handleSubmit = (offreData: IOffreC) => {
             // handle form submission
@@ -36,8 +41,9 @@ const Offres: React.FC = () => {
           Creer une offre
         </button>
             </div>
+            <OffersList offers={offres} />
             
-            <OffresTable/>
+            
 
             <Modal
                     isOpen={isModalOpen}
@@ -45,7 +51,7 @@ const Offres: React.FC = () => {
                       setIsModalOpen(false);
                       setEditingOffre(null);
                     }}
-                    title={editingOffre ? 'Edit Offre' : 'Add Offre'}
+                    title={editingOffre ? 'Edit Offre' : 'Creer une  Offre'}
                   >
                     <OfferForm
                     onSubmit={handleSubmit}

@@ -70,8 +70,7 @@ export interface IDocument {
 
 // Interface for Offre (inherits IDocument)
 export interface IOffre extends IDocument {
-  category: ICategory;
-  produit: IProduct;
+  produit: IProduct[];
   date_modification: string; // ISO 8601 formatted string
   date_validation?: string | null; // Optional field
   sites: ISite[]; // Array of associated sites
@@ -91,8 +90,7 @@ sequence_number: number;
 
 // Interface for Offre (inherits IDocument)
 export interface IOffreC extends IDocumentC {
-category: number;
-produit: number;
+produit: Array<number>;
 date_modification: string; // ISO 8601 formatted string
 date_validation?: string | null; // Optional field
 sites: Array<number>; // Array of associated sites
@@ -141,4 +139,22 @@ export interface IAttestationFormation extends IDocument {
   formation: IFormation; // Associated Formation
   participant: IParticipant; // Associated Participant
   details_formation: string;
+}
+
+
+// Interface for Affaire (inherits IDocument)
+export interface IAffaire extends IDocument {
+  offre: IOffre; // Associated Offre
+  date_debut: string; // ISO 8601 formatted string
+  date_fin_prevu: string; // ISO 8601 formatted string
+  status: string;
+
+}
+
+export interface IAffaireC extends IDocumentC {
+  offre: number; // Associated Offre
+  date_debut: string; // ISO 8601 formatted string
+  date_fin_prevu: string; // ISO 8601 formatted string
+  status: string;
+
 }

@@ -10,7 +10,7 @@ interface OffreContextType {
   error: string | null;
   fetchOffres: () => Promise<void>;
   addOffre: (offre: IOffreC) => Promise<IOffre>;
-  updateOffre: (id: number, offre: IOffre) => Promise<IOffre>;
+  updateOffre: (id: number, offre: IOffreC) => Promise<IOffre>;
   deleteOffre: (id: number) => Promise<void>;
   selectOffre: (offre: IOffre | null) => void;
   updateStatus: (id: number, status: DocumentStatus) => Promise<IOffre>;
@@ -65,7 +65,7 @@ export function OffreProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const updateOffre = useCallback(async (id: number, offre: IOffre) => {
+  const updateOffre = useCallback(async (id: number, offre: IOffreC) => {
     try {
       setLoading(true);
       setError(null);

@@ -17,6 +17,7 @@ const navigation = [
   { name: 'Clients', href: '/clients', icon: Users },
   { name: 'Sites', href: '/sites', icon: MapPin },
   { name: 'Offres', href: '/offres', icon: HandCoins },
+  { name: 'Affaires', href: '/affaires', icon: FileText },
   { name: 'Rapports', href: '/rapports', icon: FileText },
   
   
@@ -31,7 +32,7 @@ export function Sidebar() {
   return (
     <div className="flex h-full w-64 flex-col bg-gray-900">
       <div className="flex h-16 items-center justify-center border-b border-gray-800">
-        <h1 className="text-xl font-bold text-white">Management App</h1>
+        <h1 className="text-xl font-bold text-white">KES DOC_GEN</h1>
       </div>
       <nav className="flex-1 space-y-1 px-2 py-4">
         {navigation.map((item) => {

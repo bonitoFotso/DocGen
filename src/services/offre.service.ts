@@ -15,8 +15,8 @@ export const OffreService = {
     return response.data;
   },
 
-  update: async (id: number, offre: IOffre): Promise<IOffre> => {
-    const response = await axios.put(`${OFFRE_API}${id}`, offre);
+  update: async (id: number, offre: IOffreC): Promise<IOffre> => {
+    const response = await axios.put(`${OFFRE_API}${id}/`, offre);
     return response.data;
   },
 

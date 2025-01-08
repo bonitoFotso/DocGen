@@ -9,6 +9,7 @@ import { Documents } from './views/documents';
 import { Formations } from './views/formations';
 import Offres from './views/offres/offres';
 import { Rapports } from './views/rapports';
+import Affaires from './views/affaires/affaies';
 
 function App() {
   return (
@@ -23,6 +24,8 @@ function App() {
           <Route path="documents" element={<Documents />} />
           <Route path="formations" element={<Formations />} />
           <Route path="offres" element={<Offres/>} />
+          <Route path="affaires" element={<Affaires/>} />
+
           <Route path="rapports" element={<Rapports/>} />
           <Route path="*" element={<h1>Not Found</h1>} />
         </Route>

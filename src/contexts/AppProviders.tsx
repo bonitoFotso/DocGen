@@ -12,6 +12,7 @@ import { SiteProvider } from './SiteContext.tsx';
 import { FormationProvider } from './FormationProvider.tsx';
 import { ParticipantProvider } from './ParticipantProvider.tsx';
 import { ModalProvider } from './ModalProvider.tsx';
+import { AffaireProvider } from './AffaireProviders.tsx';
 
 interface AppProvidersProps {
   children: ReactNode;
@@ -26,6 +27,9 @@ export function AppProviders({ children }: AppProvidersProps) {
       <SiteProvider>
     <ProformaProvider>
       <OffreProvider>
+        <AffaireProvider>
+
+        
         <FactureProvider>
           <RapportProvider>
 
@@ -45,6 +49,7 @@ export function AppProviders({ children }: AppProvidersProps) {
 
           </RapportProvider>
         </FactureProvider>
+        </AffaireProvider>
       </OffreProvider>
     </ProformaProvider>
       </SiteProvider>

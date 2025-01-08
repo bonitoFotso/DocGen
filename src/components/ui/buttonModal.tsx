@@ -25,8 +25,6 @@ const ButtonModal: React.FC<ButtonModalProps> = ({ title, children }) => {
     >
       {title}
     </button>
-
-            
         </>
     );
 };
