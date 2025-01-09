@@ -26,6 +26,16 @@ export class EntityService {
     }
   }
 
+  static async createEntity(entity: { code: string; name: string }): Promise<IEntity> {
+    try {
+      const response = await axios.post(`${baseUrl}/`, entity);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating entity:', error);
+      throw error;
+    }
+  }
+
   // Mettre à jour une entité
   static async update(id: number, entity: IEntity): Promise<IEntity> {
     try {

@@ -15,10 +15,6 @@ import {
   AlertCircle,
   CheckCircle2
 } from 'lucide-react';
-import {
-  Select,
-  
-} from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import ButtonModal from '@/components/ui/buttonModal';
@@ -231,7 +227,7 @@ export function Rapports() {
           </div>
         </div>
 
-        {/* Section des filtres mise à jour */}
+       {/* Updated Filters section */}
       <div className={`bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-300 ${showFilters ? 'max-h-96' : 'max-h-0'}`}>
         <div className="p-4 space-y-4">
           <div className="flex items-center justify-between">
@@ -263,32 +259,52 @@ export function Rapports() {
             </div>
             
             <div className="relative">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="pl-9 pr-4 py-2 w-full rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none bg-white cursor-pointer"
+              >
                 <option value="">Tous les statuts</option>
                 <option value="EN_COURS">En cours</option>
                 <option value="TERMINE">Terminé</option>
                 <option value="BROUILLON">Brouillon</option>
-              </Select>
-              <Filter className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
 
             <div className="relative">
-              <Select value={dateFilter} onValueChange={setDateFilter}>
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <select
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="pl-9 pr-4 py-2 w-full rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none bg-white cursor-pointer"
+              >
                 <option value="">Toutes les dates</option>
                 <option value="today">Aujourd'hui</option>
                 <option value="week">7 derniers jours</option>
                 <option value="month">30 derniers jours</option>
-              </Select>
-              <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
 
             <div className="relative">
-              <Select 
-                value={`${sortConfig.field}-${sortConfig.order}`} 
-                onValueChange={(value) => {
-                  const [field, order] = value.split('-') as [SortField, SortOrder];
+              <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <select
+                value={`${sortConfig.field}-${sortConfig.order}`}
+                onChange={(e) => {
+                  const [field, order] = e.target.value.split('-') as [SortField, SortOrder];
                   setSortConfig({ field, order });
                 }}
+                className="pl-9 pr-4 py-2 w-full rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none bg-white cursor-pointer"
               >
                 <option value="date_creation-desc">Date (récent)</option>
                 <option value="date_creation-asc">Date (ancien)</option>
@@ -298,8 +314,12 @@ export function Rapports() {
                 <option value="client-desc">Client (Z-A)</option>
                 <option value="statut-asc">Statut (A-Z)</option>
                 <option value="statut-desc">Statut (Z-A)</option>
-              </Select>
-              <ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>

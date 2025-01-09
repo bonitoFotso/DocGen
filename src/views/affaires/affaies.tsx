@@ -16,18 +16,12 @@ import {
   CheckCircle2,
   FileText
 } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Button } from '@/components/ui/button';
 import { DocumentStatus } from '../../types';
 import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
 import ButtonModal from '@/components/ui/buttonModal';
+import { AffaireForm } from './AffaireForm';
 
 type SortField = 'reference' | 'date_creation' | 'statut' | 'client';
 type SortOrder = 'asc' | 'desc';
@@ -48,15 +42,15 @@ const Affaires: React.FC = () => {
     fetchAffaires();
   }, [fetchAffaires]);
 
-  const handleSort = (field: SortField) => {
+  /*const handleSort = (field: SortField) => {
     setSortConfig(prev => ({
       field,
       order: prev.field === field && prev.order === 'asc' ? 'desc' : 'asc'
     }));
-  };
+  };*/
 
   const filteredAffaires = useMemo(() => {
-    let filtered = affaires.filter(affaire => {
+    const filtered = affaires.filter(affaire => {
       const matchesSearch = affaire.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            affaire.offre.client.nom.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = !statusFilter || affaire.statut === statusFilter;
@@ -189,7 +183,7 @@ const Affaires: React.FC = () => {
               className="whitespace-nowrap"
             >
               <div className="p-4">
-                <p>Formulaire de création d'affaire à implémenter</p>
+                <AffaireForm/>
               </div>
             </ButtonModal>
           </div>
@@ -245,88 +239,103 @@ const Affaires: React.FC = () => {
           </div>
         </div>
 
-        {/* Filtres */}
-        <div className={`bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-300 ${showFilters ? 'max-h-96' : 'max-h-0'}`}>
-          <div className="p-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                <Filter className="w-4 h-4" />
-                Filtres et tri
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearFilters}
-                className="gap-2 text-gray-500 hover:text-gray-700"
-              >
-                <Trash2 className="w-4 h-4" />
-                Réinitialiser
-              </Button>
+        {/* Updated Filters section */}
+      <div className={`bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-300 ${showFilters ? 'max-h-96' : 'max-h-0'}`}>
+        <div className="p-4 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
+              <Filter className="w-4 h-4" />
+              Filtres et tri
+            </h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearFilters}
+              className="gap-2 text-gray-500 hover:text-gray-700"
+            >
+              <Trash2 className="w-4 h-4" />
+              Réinitialiser
+            </Button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Rechercher..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9 pr-4 py-2 w-full rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
+              />
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Rechercher..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 pr-4 py-2 w-full rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
-                />
+            <div className="relative">
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="pl-9 pr-4 py-2 w-full rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none bg-white cursor-pointer"
+              >
+                <option value="">Tous les statuts</option>
+                <option value={DocumentStatus.EN_COURS}>En cours</option>
+                <option value={DocumentStatus.TERMINE}>Terminé</option>
+                <option value={DocumentStatus.BROUILLON}>Brouillon</option>
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
               </div>
-              
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Statut" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Tous les statuts</SelectItem>
-                  <SelectItem value={DocumentStatus.EN_COURS}>En cours</SelectItem>
-                  <SelectItem value={DocumentStatus.TERMINE}>Terminé</SelectItem>
-                  <SelectItem value={DocumentStatus.BROUILLON}>Brouillon</SelectItem>
-                </SelectContent>
-              </Select>
+            </div>
 
-              <Select value={dateFilter} onValueChange={setDateFilter}>
-                <SelectTrigger>
-                  <Calendar className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Période" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Toutes les dates</SelectItem>
-                  <SelectItem value="today">Aujourd'hui</SelectItem>
-                  <SelectItem value="week">7 derniers jours</SelectItem>
-                  <SelectItem value="month">30 derniers jours</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="relative">
+              <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <select
+                value={dateFilter}
+                onChange={(e) => setDateFilter(e.target.value)}
+                className="pl-9 pr-4 py-2 w-full rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none bg-white cursor-pointer"
+              >
+                <option value="">Toutes les dates</option>
+                <option value="today">Aujourd'hui</option>
+                <option value="week">7 derniers jours</option>
+                <option value="month">30 derniers jours</option>
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
 
-              <Select 
-                value={`${sortConfig.field}-${sortConfig.order}`} 
-                onValueChange={(value) => {
-                  const [field, order] = value.split('-') as [SortField, SortOrder];
+            <div className="relative">
+              <ArrowUpDown className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <select
+                value={`${sortConfig.field}-${sortConfig.order}`}
+                onChange={(e) => {
+                  const [field, order] = e.target.value.split('-') as [SortField, SortOrder];
                   setSortConfig({ field, order });
                 }}
+                className="pl-9 pr-4 py-2 w-full rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none bg-white cursor-pointer"
               >
-                <SelectTrigger>
-                  <ArrowUpDown className="w-4 h-4 mr-2" />
-                  <SelectValue placeholder="Trier par" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="date_creation-desc">Date (récent)</SelectItem>
-                  <SelectItem value="date_creation-asc">Date (ancien)</SelectItem>
-                  <SelectItem value="reference-asc">Référence (A-Z)</SelectItem>
-                  <SelectItem value="reference-desc">Référence (Z-A)</SelectItem>
-                  <SelectItem value="client-asc">Client (A-Z)</SelectItem>
-                  <SelectItem value="client-desc">Client (Z-A)</SelectItem>
-                  <SelectItem value="statut-asc">Statut (A-Z)</SelectItem>
-                  <SelectItem value="statut-desc">Statut (Z-A)</SelectItem>
-                </SelectContent>
-              </Select>
+                <option value="date_creation-desc">Date (récent)</option>
+                <option value="date_creation-asc">Date (ancien)</option>
+                <option value="reference-asc">Référence (A-Z)</option>
+                <option value="reference-desc">Référence (Z-A)</option>
+                <option value="client-asc">Client (A-Z)</option>
+                <option value="client-desc">Client (Z-A)</option>
+                <option value="statut-asc">Statut (A-Z)</option>
+                <option value="statut-desc">Statut (Z-A)</option>
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
         {/* Liste des affaires */}
         <div className="bg-white rounded-xl border border-gray-200 shadow-sm">

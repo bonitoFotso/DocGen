@@ -1,16 +1,16 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Layout } from './components/layout/layout';
 import { Dashboard } from './views/dashboard';
-import { Entities } from './views/entities';
-import { Clients } from './views/clients';
+import { Entities } from './views/entities/entities';
 import { Sites } from './views/sites';
 import { Products } from './views/products';
 import { Documents } from './views/documents';
-import { Formations } from './views/formations';
 import { Rapports } from './views/rapports/rapports';
 import Affaires from './views/affaires/affaies';
 import { Proformas } from './views/proformas/Proformas';
 import { Offres } from './views/offres/offres';
+import { Clients } from './views/clients/clients';
+import { Formations } from './views/formations/formations';
 
 function App() {
   return (

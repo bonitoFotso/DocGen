@@ -23,6 +23,13 @@ export interface ISite {
   description?: string | null; // Optional field
 }
 
+export interface Site {
+  nom: string;
+  client: IClient; // Associated client
+  localisation?: string | null; // Optional field
+  description?: string | null; // Optional field
+}
+
 // Interface for Site
 export interface ISiteC {
   id: number;
@@ -129,7 +136,7 @@ export interface IFormation {
   id: number;
   titre: string;
   client: IClient;
-  proforma: IProforma; // Associated Proforma
+  affaire: IAffaire; // Associated Proforma
   date_debut: string; // ISO 8601 formatted string
   date_fin: string; // ISO 8601 formatted string
   description?: string | null; // Optional field
