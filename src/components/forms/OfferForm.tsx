@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Info, AlertCircle, Check, X, Plus, Loader2 } from 'lucide-react';
+import { Info, AlertCircle, Check, X, Loader2, MapPin, Package, Users, Building2 } from 'lucide-react';
 import { useEntity } from '../../contexts/EntityContext';
 import { useClient } from '../../contexts/ClientContext';
 import { useCategory } from '../../hooks/useCategory';
@@ -167,217 +167,206 @@ const OfferForm: React.FC<OfferFormProps> = ({
   };
 
   return (
-    <Card className="w-full max-w-6xl  bg-white shadow-lg">
-      <CardHeader className="border-b border-gray-100">
-        <CardTitle className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          {isEditing ? 'Modifier l\'offre' : 'Nouvelle offre'}
-          {isEditing && (
-            <span className="text-sm font-normal px-2 py-1 bg-blue-50 text-blue-600 rounded">
-              En édition
-            </span>
-          )}
-        </CardTitle>
-      </CardHeader>
+    <Card className="w-full max-w-[200vw] bg-white shadow-lg">
+      
 
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-6 py-6">
+        <form onSubmit={handleSubmit} className="py-6">
           {showSuccessMessage && (
             <Alert className="mb-6 bg-green-50 border-green-200 rounded-lg">
-              <Check className="w-4 h-4 text-green-500" />
-              <AlertDescription className="text-green-700">
+              <Check className="w-5 h-5 text-green-500" />
+              <AlertDescription className="text-green-700 font-medium">
                 {isEditing ? 'Offre mise à jour avec succès !' : 'Offre créée avec succès !'}
               </AlertDescription>
             </Alert>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                Entité <Info className="w-4 h-4 text-gray-400" />
-              </label>
-              <select
-                value={formData.entity || ''}
-                onChange={(e) => handleSelectChange(e, 'entity')}
-                className={`w-full h-10 px-3 rounded-md border ${
-                  errors.entity ? 'border-red-300 bg-red-50' : 'border-gray-200'
-                } focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all`}
-              >
-                <option value="">Sélectionnez une entité</option>
-                {entities?.map((ent) => (
-                  <option key={ent.id} value={ent.id}>{ent.name}</option>
-                ))}
-              </select>
-              {errors.entity && (
-                <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.entity}
-                </p>
-              )}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Section Informations Principales */}
+            <div className="space-y-6 bg-white rounded-lg border border-gray-100 p-6">
+              <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2 pb-2 border-b border-gray-100">
+                <Building2 className="w-5 h-5 text-gray-500" />
+                Informations Principales
+              </h3>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    Entité <Info className="w-4 h-4 text-gray-400" />
+                  </label>
+                  <select
+                    value={formData.entity || ''}
+                    onChange={(e) => handleSelectChange(e, 'entity')}
+                    className={`w-full h-11 px-4 rounded-lg border ${
+                      errors.entity ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                    } focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all`}
+                  >
+                    <option value="">Sélectionnez une entité</option>
+                    {entities?.map((ent) => (
+                      <option key={ent.id} value={ent.id}>{ent.name}</option>
+                    ))}
+                  </select>
+                  {errors.entity && (
+                    <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.entity}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                    <Users className="w-4 h-4 text-gray-400" />
+                    Client
+                  </label>
+                  <select
+                    value={formData.client || ''}
+                    onChange={(e) => handleSelectChange(e, 'client')}
+                    className={`w-full h-11 px-4 rounded-lg border ${
+                      errors.client ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                    } focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all`}
+                  >
+                    <option value="">Sélectionnez un client</option>
+                    {clients?.map((cli) => (
+                      <option key={cli.id} value={cli.id}>{cli.nom}</option>
+                    ))}
+                  </select>
+                  {errors.client && (
+                    <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
+                      <AlertCircle className="w-4 h-4" />
+                      {errors.client}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Client
-              </label>
-              <select
-                value={formData.client || ''}
-                onChange={(e) => handleSelectChange(e, 'client')}
-                className={`w-full h-10 px-3 rounded-md border ${
-                  errors.client ? 'border-red-300 bg-red-50' : 'border-gray-200'
-                } focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all`}
-              >
-                <option value="">Sélectionnez un client</option>
-                {clients?.map((cli) => (
-                  <option key={cli.id} value={cli.id}>{cli.nom}</option>
-                ))}
-              </select>
-              {errors.client && (
-                <p className="text-sm text-red-500 flex items-center gap-1 mt-1">
-                  <AlertCircle className="w-4 h-4" />
-                  {errors.client}
-                </p>
-              )}
-            </div>
-          </div>
+            {/* Section Produits */}
+            <div className="space-y-6 bg-white rounded-lg border border-gray-100 p-6">
+              <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2 pb-2 border-b border-gray-100">
+                <Package className="w-5 h-5 text-gray-500" />
+                Sélection des Produits
+              </h3>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-              Catégorie <Info className="w-4 h-4 text-gray-400" />
-            </label>
-            <select
-              value={category || ''}
-              onChange={handleCategorySelectChange}
-              className="w-full h-10 px-3 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
-            >
-              <option value="">Toutes les catégories</option>
-              {categories?.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
-          </div>
+              <div className="space-y-4">
+                <div className="space-y-3">
+                  <select
+                    value={category || ''}
+                    onChange={handleCategorySelectChange}
+                    className="w-full h-11 px-4 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
+                  >
+                    <option value="">Toutes les catégories</option>
+                    {categories?.map((cat) => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
 
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                Produits
-                {category && (
-                  <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded">
-                    Filtrés par catégorie
-                  </span>
+                  <select
+                    onChange={handleAddProduct}
+                    className="w-full h-11 px-4 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all disabled:bg-gray-50 disabled:text-gray-500"
+                    disabled={!category}
+                  >
+                    <option value="">
+                      {category ? 'Ajouter un produit' : 'Veuillez d\'abord sélectionner une catégorie'}
+                    </option>
+                    {filteredProducts.map((prod) => (
+                      <option 
+                        key={prod.id} 
+                        value={prod.id}
+                        disabled={formData.produit?.includes(prod.id)}
+                      >
+                        {prod.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                  {formData.produit?.map((productId) => (
+                    <div 
+                      key={productId} 
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 group hover:border-blue-200 hover:shadow-sm transition-all"
+                    >
+                      <span className="text-sm text-gray-700">{getProductName(productId)}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveProduct(productId)}
+                        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                {errors.produit && (
+                  <p className="text-sm text-red-500 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.produit}
+                  </p>
                 )}
-              </label>
-              <Plus className="w-4 h-4 text-gray-400" />
+              </div>
             </div>
 
-            <select
-              onChange={handleAddProduct}
-              className="w-full h-10 px-3 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all disabled:bg-gray-50 disabled:text-gray-500"
-              disabled={!category}
-            >
-              <option value="">
-                {category ? 'Ajouter un produit' : 'Veuillez d\'abord sélectionner une catégorie'}
-              </option>
-              {filteredProducts.map((prod) => (
-                <option 
-                  key={prod.id} 
-                  value={prod.id}
-                  disabled={formData.produit?.includes(prod.id)}
-                >
-                  {prod.name}
-                </option>
-              ))}
-            </select>
+            {/* Section Sites */}
+            <div className="space-y-6 bg-white rounded-lg border border-gray-100 p-6">
+              <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-2 pb-2 border-b border-gray-100">
+                <MapPin className="w-5 h-5 text-gray-500" />
+                Sites d'intervention
+              </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto p-2">
-              {formData.produit?.map((productId) => (
-                <div 
-                  key={productId} 
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200 group hover:border-gray-300 transition-all"
+              <div className="space-y-4">
+                <select
+                  onChange={handleSiteSelection}
+                  className="w-full h-11 px-4 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
                 >
-                  <span className="text-sm text-gray-700">{getProductName(productId)}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveProduct(productId)}
-                    className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
+                  <option value="">Ajouter un site</option>
+                  {sites?.map((site) => (
+                    <option 
+                      key={site.id} 
+                      value={site.id}
+                      disabled={formData.sites?.includes(site.id)}
+                    >
+                      {site.nom}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                  {formData.sites?.map((siteId) => (
+                    <div 
+                      key={siteId} 
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 group hover:border-blue-200 hover:shadow-sm transition-all"
+                    >
+                      <span className="text-sm text-gray-700">{getSiteName(siteId)}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveSite(siteId)}
+                        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              ))}
+                {errors.sites && (
+                  <p className="text-sm text-red-500 flex items-center gap-1">
+                    <AlertCircle className="w-4 h-4" />
+                    {errors.sites}
+                  </p>
+                )}
+              </div>
             </div>
-            {errors.produit && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
-                <AlertCircle className="w-4 h-4" />
-                {errors.produit}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium text-gray-700">
-                Sites associés
-              </label>
-              <Plus className="w-4 h-4 text-gray-400" />
-            </div>
-
-            <select
-              onChange={handleSiteSelection}
-              className="w-full h-10 px-3 rounded-md border border-gray-200 focus:ring-2 focus:ring-blue-200 focus:border-blue-400 transition-all"
-            >
-              <option value="">Ajouter un site</option>
-              {sites?.map((site) => (
-                <option 
-                  key={site.id} 
-                  value={site.id}
-                  disabled={formData.sites?.includes(site.id)}
-                >
-                  {site.nom}
-                </option>
-              ))}
-            </select>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-60 overflow-y-auto p-2">
-              {formData.sites?.map((siteId) => (
-                <div 
-                  key={siteId} 
-                  className="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200 group hover:border-gray-300 transition-all"
-                >
-                  <span className="text-sm text-gray-700">{getSiteName(siteId)}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveSite(siteId)}
-                    className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              ))}
-            </div>
-            {errors.sites && (
-              <p className="text-sm text-red-500 flex items-center gap-1">
-                <AlertCircle className="w-4 h-4" />
-                {errors.sites}
-              </p>
-            )}
           </div>
         </form>
       </CardContent>
 
-      <CardFooter className="flex justify-between py-4 px-6 border-t border-gray-100">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-all focus:ring-2 focus:ring-gray-200"
-          disabled={isSubmitting}
-        >
-          Annuler
-        </button>
+      <CardFooter className="flex justify-end py-4 px-6 border-t border-gray-100 bg-gray-50">
+        
         <button
           type="submit"
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="px-4 py-2 text-white bg-blue-500 rounded-md hover:bg-blue-600 transition-all focus:ring-2 focus:ring-blue-200 disabled:bg-blue-300 flex items-center gap-2"
+          className="px-6 py-2.5 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-all focus:ring-2 focus:ring-blue-200 disabled:bg-blue-300 flex items-center gap-2 font-medium"
         >
           {isSubmitting ? (
             <>
@@ -392,5 +381,4 @@ const OfferForm: React.FC<OfferFormProps> = ({
     </Card>
   );
 };
-
 export default OfferForm;

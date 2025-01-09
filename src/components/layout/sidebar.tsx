@@ -18,6 +18,7 @@ const navigation = [
   { name: 'Sites', href: '/sites', icon: MapPin },
   { name: 'Offres', href: '/offres', icon: HandCoins },
   { name: 'Affaires', href: '/affaires', icon: FileText },
+  { name: 'Proformas', href: '/proformas', icon: FileText },
   { name: 'Rapports', href: '/rapports', icon: FileText },
   
   

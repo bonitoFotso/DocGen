@@ -38,6 +38,7 @@ export interface ICategory {
   code: string; // Must be 3 uppercase letters
   name: string;
   entity: IEntity;
+  produits: IProduct[];
 }
 
 // Interface for Product
@@ -54,6 +55,8 @@ export enum DocumentStatus {
   ENVOYE = 'ENVOYE',
   VALIDE = 'VALIDE',
   REFUSE = 'REFUSE',
+  EN_COURS = "EN_COURS",
+  TERMINE = "TERMINE",
 }
 
 // Base Interface for Documents
@@ -96,6 +99,13 @@ date_validation?: string | null; // Optional field
 sites: Array<number>; // Array of associated sites
 }
 
+export interface IOff {
+  produit: IProduct[];
+  date_modification: string; // ISO 8601 formatted string
+  date_validation?: string | null; // Optional field
+  sites: ISite[]; // Array of associated sites
+}
+
 // Interface for Proforma (inherits IDocument)
 export interface IProforma extends IDocument {
   offre: IOffre; // Associated Offre
@@ -108,7 +118,10 @@ export interface IFacture extends IDocument {
 
 // Interface for Rapport (inherits IDocument)
 export interface IRapport extends IDocument {
+
   proforma: IProforma; // Associated Proforma
+  site: ISite;
+  produit: IProduct;
 }
 
 // Interface for Formation
@@ -149,6 +162,11 @@ export interface IAffaire extends IDocument {
   date_fin_prevu: string; // ISO 8601 formatted string
   status: string;
 
+  client: IClient;
+  produit: Array<IProduct>;
+  sites: Array<ISite>;
+rapports: Array<IRapport>;
+
 }
 
 export interface IAffaireC extends IDocumentC {
@@ -156,5 +174,7 @@ export interface IAffaireC extends IDocumentC {
   date_debut: string; // ISO 8601 formatted string
   date_fin_prevu: string; // ISO 8601 formatted string
   status: string;
+
+
 
 }
