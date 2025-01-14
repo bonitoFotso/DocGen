@@ -1,4 +1,4 @@
-import { IRapport } from '../types';
+import { IRapport } from '../interfaces';
 import axios from 'axios';
 
 const baseUrl = 'http://192.168.1.160:8008/rapports';  // Remplacez par l'URL de votre API

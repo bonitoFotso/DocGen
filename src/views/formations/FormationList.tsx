@@ -21,7 +21,7 @@ import {
   X
 } from 'lucide-react';
 import FormationModal from './FormationModal';
-import { IFormation } from '@/types';
+import { IFormation } from '@/interfaces';
 
 interface FormationListProps {
   formations: IFormation[];

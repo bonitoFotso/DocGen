@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useCallback, useMemo, useState, useContext, useEffect } from 'react';
-import { DocumentStatus, IFacture } from '../types';
+import { DocumentStatus, IFacture } from '../interfaces.ts';
 import { FactureService } from '../services/facture.service.ts';
 
 // Définition du contexte

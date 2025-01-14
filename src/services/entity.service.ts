@@ -1,4 +1,4 @@
-import { IEntity } from '../types';
+import { IEntity } from '../interfaces';
 import axios from 'axios';
 
 const baseUrl = 'http://192.168.1.160:8008/entities';  // Remplacez par l'URL de votre API

@@ -1,7 +1,7 @@
 // services/category.service.ts
 
 import axios from 'axios';
-import { ICategory } from '../types';
+import { ICategory } from '../interfaces';
 
 const BASE_URL = 'http://192.168.1.160:8008/categories'; // Changez cette URL selon votre backend
 

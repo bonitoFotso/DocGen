@@ -1,5 +1,5 @@
 import { apiClient } from './api';
-import { ISite, ISiteC } from '../types';
+import { ISite, ISiteC } from '../interfaces';
 
 
 const SITE_API = 'http://192.168.1.160:8008/sites/';

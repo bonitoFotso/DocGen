@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect } from 'react';
-import { IProforma, DocumentStatus } from '../types';
+import { IProforma, DocumentStatus } from '../interfaces.ts';
 import { ProformaService } from '../services/proforma.service.ts';
 
 interface ProformaContextType {

@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { IRapport } from '@/types';
+import { IRapport } from '@/interfaces';
 
 
 interface RapportsListProps {

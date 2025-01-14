@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { IParticipant } from '../types';
+import { IParticipant } from '../interfaces';
 
 const PARTICIPANT_API = 'http://192.168.1.160:8008/participants/';
 

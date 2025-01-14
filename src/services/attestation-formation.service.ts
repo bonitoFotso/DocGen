@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { DocumentStatus, IAttestationFormation } from '../types';
+import { DocumentStatus, IAttestationFormation } from '../interfaces';
 
 const baseUrl = 'http://192.168.1.160:8001/attestation-formations';  // Remplacez par l'URL de votre API
 

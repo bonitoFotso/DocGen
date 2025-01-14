@@ -12,7 +12,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { IOffre } from '@/types';
+import { IOffre } from '@/interfaces';
 import { cn } from '@/lib/utils';
 
 interface OfferDetailsProps {

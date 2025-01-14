@@ -5,7 +5,7 @@ import { useClient } from '../../contexts/ClientContext';
 import { useCategory } from '../../hooks/useCategory';
 import { useProduct } from '../../hooks/useProduct';
 import { useSite } from '../../contexts/SiteContext';
-import { DocumentStatus, IOffre, IOffreC } from '../../types';
+import { DocumentStatus, IOffre, IOffreC } from '../../interfaces';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../../common/CustomCard';
 import { Alert, AlertDescription } from '../../common/CustomAlert';
 

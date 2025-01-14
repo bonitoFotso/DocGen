@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { DataTable } from '../components/ui/data-table';
 import type { ColumnDef } from '@tanstack/react-table';
-import type { IDocument } from '../types';
+import type { IDocument } from '../interfaces';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 

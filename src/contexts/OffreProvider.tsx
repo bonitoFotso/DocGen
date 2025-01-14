@@ -1,5 +1,5 @@
 // OffreProvider.tsx
-import { IOffre, DocumentStatus, IOffreC } from '../types';
+import { IOffre, DocumentStatus, IOffreC } from '../interfaces';
 import { OffreService } from '../services/offre.service';
 import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 

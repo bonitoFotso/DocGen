@@ -10,7 +10,7 @@ import {
   Phone,
 } from 'lucide-react';
 import ClientDetails from './ClientDetails';
-import { IClient } from '@/types';
+import { IClient } from '@/interfaces';
 
 
 

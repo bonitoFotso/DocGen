@@ -1,4 +1,4 @@
-import { IOffre, IOffreC } from "../types";
+import { IOffre, IOffreC } from "../interfaces";
 
 export function convertOffreToOffreC(offre: IOffre): IOffreC {
     return {

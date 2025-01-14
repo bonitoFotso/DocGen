@@ -1,6 +1,6 @@
 // Entity Provider
 import { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect } from 'react';
-import { IEntity } from '../types';
+import { IEntity } from '../interfaces';
 import { EntityService } from '../services/entity.service';
 
 interface EntityContextType {

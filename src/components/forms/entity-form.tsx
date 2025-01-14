@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FormField } from './form-field';
-import type { IEntity } from '../../types';
+import type { IEntity } from '../../interfaces';
 
 interface EntityFormProps {
   onSubmit: (data: Omit<IEntity, 'id'>) => void;

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { IAffaire, IAffaireC } from '../types';
+import { IAffaire, IAffaireC } from '../interfaces';
 
 const API = 'http://192.168.1.160:8008/affaires/';
 

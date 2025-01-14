@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronRight, FileText, Building2, MapPin, Package, Calendar, CheckCircle2, AlertCircle, Users, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
-import { IAffaire } from '../../types';
+import { IAffaire } from '../../interfaces';
 
 interface AffairesListProps {
   affaires: IAffaire[];

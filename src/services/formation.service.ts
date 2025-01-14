@@ -1,6 +1,6 @@
 
 import axios from 'axios';
-import { IFormation } from '../types';
+import { IFormation } from '../interfaces';
 
 
 

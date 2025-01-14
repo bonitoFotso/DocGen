@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 import { useMemo, useState, useContext, useCallback, createContext, useEffect } from 'react';
-import { IClient } from '../types';
+import { IClient } from '../interfaces';
 import { ClientService } from '../services/client.service';
 
 

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { IProforma, DocumentStatus } from '../types';
+import { IProforma, DocumentStatus } from '../interfaces';
 
 const API_URL = 'http://192.168.1.160:8008/proformas/'; // Remplacez par l'URL de votre backend
 

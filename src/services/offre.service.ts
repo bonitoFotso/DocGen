@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { IOffre, IOffreC } from '../types';
+import { IOffre, IOffreC } from '../interfaces';
 
 const OFFRE_API = 'http://192.168.1.160:8008/offres/';
 

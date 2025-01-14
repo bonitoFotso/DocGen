@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect } from 'react';
-import { IParticipant } from '../types';
+import { IParticipant } from '../interfaces';
 import { ParticipantService } from '../services/participant.service';
 
 interface ParticipantContextType {

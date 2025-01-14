@@ -1,6 +1,6 @@
 // services/product.service.ts
 
-import { IProduct } from '../types';
+import { IProduct } from '../interfaces';
 import axios from 'axios';
 
 const BASE_URL = 'http://192.168.1.160:8008/products'; // Modifiez cette URL selon votre backend

@@ -1,53 +1,58 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useServices } from '@/AppHooks';
-import { ClientBase, ClientDetail, ClientEdit } from '@/interfaces';
-import { PlusCircle, Pencil, Trash2, X, AlertCircle, Loader2, Mail, Phone, MapPin, Building2 } from 'lucide-react';
+import { SiteBase, SiteDetail, SiteEdit, ClientBase } from '@/interfaces';
+import { PlusCircle, Pencil, Trash2, X, AlertCircle, Loader2, MapPin, Building2, User2 } from 'lucide-react';
 
-const ClientManagement = () => {
-  const { clientService } = useServices();
+const SiteManagement = () => {
+  const { siteService, clientService } = useServices();
+  const [sites, setSites] = useState<SiteBase[]>([]);
   const [clients, setClients] = useState<ClientBase[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentClient, setCurrentClient] = useState<ClientDetail | null>(null);
+  const [currentSite, setCurrentSite] = useState<SiteDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
 
-  const [formData, setFormData] = useState<ClientEdit>({
+  const [formData, setFormData] = useState<SiteEdit>({
     nom: '',
-    email: '',
-    telephone: '',
-    adresse: ''
+    client: 0,
+    localisation: '',
+    description: ''
   });
 
-  const loadClients = useCallback(async () => {
+  const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await clientService.getAll();
-      setClients(data);
+      const [sitesData, clientsData] = await Promise.all([
+        siteService.getAll(),
+        clientService.getAll()
+      ]);
+      setSites(sitesData);
+      setClients(clientsData);
     } catch (err) {
       console.error(err);
-      setError('Erreur lors du chargement des clients');
+      setError('Erreur lors du chargement des données');
     } finally {
       setIsLoading(false);
     }
-  }, [clientService]);
+  }, [siteService, clientService]);
 
   useEffect(() => {
-    loadClients();
-  }, [loadClients]);
+    loadData();
+  }, [loadData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      if (currentClient) {
-        await clientService.update(currentClient.id, formData);
+      if (currentSite) {
+        await siteService.update(currentSite.id, formData);
       } else {
-        await clientService.create(formData);
+        await siteService.create(formData);
       }
       setIsModalOpen(false);
-      await loadClients();
+      await loadData();
       resetForm();
     } catch (err) {
       console.error(err);
@@ -57,21 +62,21 @@ const ClientManagement = () => {
     }
   };
 
-  const handleEdit = async (client: ClientBase) => {
+  const handleEdit = async (site: SiteBase) => {
     setIsLoading(true);
     try {
-      const detailedClient = await clientService.getById(client.id);
-      setCurrentClient(detailedClient);
+      const detailedSite = await siteService.getById(site.id);
+      setCurrentSite(detailedSite);
       setFormData({
-        nom: detailedClient.nom,
-        email: detailedClient.email || '',
-        telephone: detailedClient.telephone || '',
-        adresse: detailedClient.adresse || ''
+        nom: detailedSite.nom,
+        client: detailedSite.client.id,
+        localisation: detailedSite.localisation || '',
+        description: detailedSite.description || ''
       });
       setIsModalOpen(true);
     } catch (err) {
       console.error(err);
-      setError('Erreur lors du chargement du client');
+      setError('Erreur lors du chargement du site');
     } finally {
       setIsLoading(false);
     }
@@ -80,8 +85,8 @@ const ClientManagement = () => {
   const handleDelete = async (id: number) => {
     setIsDeleting(id);
     try {
-      await clientService.delete(id);
-      await loadClients();
+      await siteService.delete(id);
+      await loadData();
     } catch (err) {
       console.error(err);
       setError('Erreur lors de la suppression');
@@ -91,26 +96,26 @@ const ClientManagement = () => {
   };
 
   const resetForm = () => {
-    setCurrentClient(null);
+    setCurrentSite(null);
     setFormData({
       nom: '',
-      email: '',
-      telephone: '',
-      adresse: ''
+      client: clients[0]?.id || 0,
+      localisation: '',
+      description: ''
     });
     setError(null);
   };
 
-  const handleNewClient = () => {
+  const handleNewSite = () => {
     resetForm();
     setIsModalOpen(true);
   };
 
-  const filteredClients = clients.filter(client => 
-    client.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (client.email && client.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (client.telephone && client.telephone.includes(searchTerm))
+  const filteredSites = sites.filter(site => 
+    site.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (site.localisation && site.localisation.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -118,14 +123,14 @@ const ClientManagement = () => {
         <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
           <div className="flex items-center gap-2">
             <Building2 className="h-6 w-6 text-blue-600" />
-            <h1 className="text-2xl font-bold text-gray-800">Gestion des Clients</h1>
+            <h1 className="text-2xl font-bold text-gray-800">Gestion des Sites</h1>
           </div>
           <button
-            onClick={handleNewClient}
+            onClick={handleNewSite}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 flex items-center gap-2 shadow-md"
           >
             <PlusCircle className="h-5 w-5" />
-            Nouveau Client
+            Nouveau Site
           </button>
         </div>
 
@@ -148,7 +153,7 @@ const ClientManagement = () => {
           <div className="mb-4">
             <input
               type="text"
-              placeholder="Rechercher par nom, email ou téléphone..."
+              placeholder="Rechercher par nom ou localisation..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
@@ -160,13 +165,13 @@ const ClientManagement = () => {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Adresse</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Localisation</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {isLoading && !clients.length ? (
+                {isLoading && !sites.length ? (
                   <tr>
                     <td colSpan={4} className="px-6 py-4 text-center">
                       <div className="flex items-center justify-center">
@@ -175,52 +180,38 @@ const ClientManagement = () => {
                       </div>
                     </td>
                   </tr>
-                ) : filteredClients.length === 0 ? (
+                ) : filteredSites.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
-                      Aucun client trouvé
+                      Aucun site trouvé
                     </td>
                   </tr>
                 ) : (
-                  filteredClients.map((client) => (
+                  filteredSites.map((site) => (
                     <tr 
-                      key={client.id} 
+                      key={site.id} 
                       className="hover:bg-gray-50 transition-colors duration-150"
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{client.nom}</div>
+                        <div className="text-sm font-medium text-gray-900">{site.nom}</div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="space-y-1">
-                          {client.email && (
-                            <div className="flex items-center text-sm text-gray-600">
-                              <Mail className="h-4 w-4 mr-2" />
-                              <a href={`mailto:${client.email}`} className="hover:text-blue-600">
-                                {client.email}
-                              </a>
-                            </div>
-                          )}
-                          {client.telephone && (
-                            <div className="flex items-center text-sm text-gray-600">
-                              <Phone className="h-4 w-4 mr-2" />
-                              <a href={`tel:${client.telephone}`} className="hover:text-blue-600">
-                                {client.telephone}
-                              </a>
-                            </div>
-                          )}
+                        <div className="flex items-center text-sm text-gray-600">
+                          <User2 className="h-4 w-4 mr-2" />
+                          <span>{site.client_nom}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        {client.nom && (
+                        {site.localisation && (
                           <div className="flex items-center text-sm text-gray-600">
                             <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-                            <span className="truncate max-w-xs">{client.nom}</span>
+                            <span className="truncate max-w-xs">{site.localisation}</span>
                           </div>
                         )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
                         <button
-                          onClick={() => handleEdit(client)}
+                          onClick={() => handleEdit(site)}
                           className="text-indigo-600 hover:text-indigo-900 mr-4 transition-colors duration-200 inline-flex items-center"
                           disabled={isLoading}
                         >
@@ -228,11 +219,11 @@ const ClientManagement = () => {
                           Modifier
                         </button>
                         <button
-                          onClick={() => handleDelete(client.id)}
+                          onClick={() => handleDelete(site.id)}
                           className="text-red-600 hover:text-red-900 transition-colors duration-200 inline-flex items-center"
-                          disabled={isDeleting === client.id}
+                          disabled={isDeleting === site.id}
                         >
-                          {isDeleting === client.id ? (
+                          {isDeleting === site.id ? (
                             <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                           ) : (
                             <Trash2 className="h-4 w-4 mr-1" />
@@ -255,7 +246,7 @@ const ClientManagement = () => {
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-gray-900">
-                  {currentClient ? 'Modifier le client' : 'Nouveau client'}
+                  {currentSite ? 'Modifier le site' : 'Nouveau site'}
                 </h2>
                 <button
                   onClick={() => setIsModalOpen(false)}
@@ -274,37 +265,41 @@ const ClientManagement = () => {
                     onChange={(e) => setFormData({ ...formData, nom: e.target.value })}
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                    placeholder="Nom du client"
+                    placeholder="Nom du site"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Client</label>
+                  <select
+                    value={formData.client}
+                    onChange={(e) => setFormData({ ...formData, client: Number(e.target.value) })}
+                    required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                    placeholder="email@exemple.com"
-                  />
+                  >
+                    <option value="">Sélectionnez un client</option>
+                    {clients.map(client => (
+                      <option key={client.id} value={client.id}>{client.nom}</option>
+                    ))}
+                  </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Localisation</label>
                   <input
-                    type="tel"
-                    value={formData.telephone}
-                    onChange={(e) => setFormData({ ...formData, telephone: e.target.value })}
+                    type="text"
+                    value={formData.localisation}
+                    onChange={(e) => setFormData({ ...formData, localisation: e.target.value })}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
-                    placeholder="+33 1 23 45 67 89"
+                    placeholder="Adresse du site"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
                   <textarea
-                    value={formData.adresse}
-                    onChange={(e) => setFormData({ ...formData, adresse: e.target.value })}
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={3}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 resize-none"
-                    placeholder="Adresse complète"
+                    placeholder="Description du site"
                   />
                 </div>
 
@@ -323,7 +318,7 @@ const ClientManagement = () => {
                     disabled={isLoading}
                   >
                     {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    {currentClient ? 'Modifier' : 'Créer'}
+                    {currentSite ? 'Modifier' : 'Créer'}
                   </button>
                 </div>
               </form>
@@ -335,4 +330,4 @@ const ClientManagement = () => {
   );
 };
 
-export default ClientManagement;
+export default SiteManagement;

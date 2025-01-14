@@ -1,18 +1,17 @@
 // ProductProvider.tsx
 import { createContext, useState, useCallback, useMemo, ReactNode, useEffect } from 'react';
-import { IProduct } from '../types';
 import { ProductService } from '../services/product.service.ts';
 
 interface ProductContextType {
-  products: IProduct[];
-  selectedProduct: IProduct | null;
+  products: Product[];
+  selectedProduct: Product | null;
   loading: boolean;
   error: string | null;
   fetchProducts: () => Promise<void>;
-  addProduct: (product: IProduct) => Promise<IProduct>;
-  updateProduct: (id: number, product: IProduct) => Promise<IProduct>;
+  addProduct: (product: Product) => Promise<Product>;
+  updateProduct: (id: number, product: Product) => Promise<Product>;
   deleteProduct: (id: number) => Promise<void>;
-  selectProduct: (product: IProduct | null) => void;
+  selectProduct: (product: Product | null) => void;
 }
 
 export const ProductContext = createContext<ProductContextType | undefined>(undefined);
@@ -20,8 +19,8 @@ export const ProductContext = createContext<ProductContextType | undefined>(unde
 
 
 export function ProductProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<IProduct[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<IProduct | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,7 +42,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
   }
   , [fetchProducts]);
 
-  const addProduct = useCallback(async (product: IProduct) => {
+  const addProduct = useCallback(async (product: Product) => {
     try {
       setLoading(true);
       const newProduct = await ProductService.create(product);
@@ -58,7 +57,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const updateProduct = useCallback(async (id: number, product: IProduct) => {
+  const updateProduct = useCallback(async (id: number, product: Product) => {
     try {
       setLoading(true);
       const updatedProduct = await ProductService.update(id, product);
@@ -89,7 +88,7 @@ export function ProductProvider({ children }: { children: ReactNode }) {
     }
   }, [selectedProduct]);
 
-  const selectProduct = useCallback((product: IProduct | null) => {
+  const selectProduct = useCallback((product: Product | null) => {
     setSelectedProduct(product);
   }, []);
 

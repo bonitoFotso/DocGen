@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createContext, useState, useCallback, useMemo, ReactNode, useEffect } from 'react';
-import { ICategory } from '../types';
+import { ICategory } from '../interfaces.ts';
 import { CategoryService } from '../services/category.service.ts';
 
 interface CategoryContextType {

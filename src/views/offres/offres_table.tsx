@@ -1,6 +1,6 @@
 import React from "react";
 import { useOffre } from "../../contexts/OffreProvider";
-import { IOffre } from "../../types";
+import { IOffre } from "../../interfaces";
 import { ColumnDef } from "@tanstack/react-table";
 import { DataTable } from "../../components/ui/data-table";
 import { Edit, Trash2 } from "lucide-react";

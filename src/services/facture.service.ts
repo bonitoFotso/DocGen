@@ -1,6 +1,6 @@
 // FactureService.ts
 import axios from 'axios';
-import { IFacture, DocumentStatus } from '../types';
+import { IFacture, DocumentStatus } from '../interfaces';
 
 const API_URL = 'http://192.168.1.160:8008/factures/'; // Remplacez par l'URL de votre backend
 

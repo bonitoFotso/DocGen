@@ -1,57 +1,52 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useServices } from '@/AppHooks';
-import { ProductBase, ProductDetail, ProductEdit, CategoryBase } from '@/interfaces';
-import { PlusCircle, Pencil, Trash2, X, AlertCircle, Loader2, Package, Layers, FileText } from 'lucide-react';
+import { CategoryBase, CategoryDetail, CategoryEdit } from '@/interfaces';
+import { PlusCircle, Pencil, Trash2, X, AlertCircle, Loader2, Layers, Package } from 'lucide-react';
 
-const ProductManagement = () => {
-  const { productService, categoryService } = useServices();
-  const [products, setProducts] = useState<ProductBase[]>([]);
+const CategoryManagement = () => {
+  const { categoryService } = useServices();
   const [categories, setCategories] = useState<CategoryBase[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentProduct, setCurrentProduct] = useState<ProductDetail | null>(null);
+  const [currentCategory, setCurrentCategory] = useState<CategoryDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isDeleting, setIsDeleting] = useState<number | null>(null);
 
-  const [formData, setFormData] = useState<ProductEdit>({
+  const [formData, setFormData] = useState<CategoryEdit>({
     code: '',
     name: '',
-    category: 0
+    entity: 0
   });
 
-  const loadData = useCallback(async () => {
+  const loadCategories = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [productsData, categoriesData] = await Promise.all([
-        productService.getAll(),
-        categoryService.getAll()
-      ]);
-      setProducts(productsData);
-      setCategories(categoriesData);
+      const data = await categoryService.getAll();
+      setCategories(data);
     } catch (err) {
       console.error(err);
-      setError('Erreur lors du chargement des données');
+      setError('Erreur lors du chargement des catégories');
     } finally {
       setIsLoading(false);
     }
-  }, [productService, categoryService]);
+  }, [categoryService]);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    loadCategories();
+  }, [loadCategories]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      if (currentProduct) {
-        await productService.update(currentProduct.id, formData);
+      if (currentCategory) {
+        await categoryService.update(currentCategory.id, formData);
       } else {
-        await productService.create(formData);
+        await categoryService.create(formData);
       }
       setIsModalOpen(false);
-      await loadData();
+      await loadCategories();
       resetForm();
     } catch (err) {
       console.error(err);
@@ -61,20 +56,20 @@ const ProductManagement = () => {
     }
   };
 
-  const handleEdit = async (product: ProductBase) => {
+  const handleEdit = async (category: CategoryBase) => {
     setIsLoading(true);
     try {
-      const detailedProduct = await productService.getById(product.id);
-      setCurrentProduct(detailedProduct);
+      const detailedCategory = await categoryService.getById(category.id);
+      setCurrentCategory(detailedCategory);
       setFormData({
-        code: detailedProduct.code,
-        name: detailedProduct.name,
-        category: detailedProduct.category.id
+        code: detailedCategory.code,
+        name: detailedCategory.name,
+        entity: detailedCategory.entity.id
       });
       setIsModalOpen(true);
     } catch (err) {
       console.error(err);
-      setError('Erreur lors du chargement du produit');
+      setError('Erreur lors du chargement de la catégorie');
     } finally {
       setIsLoading(false);
     }
@@ -83,8 +78,8 @@ const ProductManagement = () => {
   const handleDelete = async (id: number) => {
     setIsDeleting(id);
     try {
-      await productService.delete(id);
-      await loadData();
+      await categoryService.delete(id);
+      await loadCategories();
     } catch (err) {
       console.error(err);
       setError('Erreur lors de la suppression');
@@ -94,46 +89,42 @@ const ProductManagement = () => {
   };
 
   const resetForm = () => {
-    setCurrentProduct(null);
+    setCurrentCategory(null);
     setFormData({
       code: '',
       name: '',
-      category: categories[0]?.id || 0
+      entity: 0
     });
     setError(null);
   };
 
-  const handleNewProduct = () => {
+  const handleNewCategory = () => {
     resetForm();
     setIsModalOpen(true);
   };
 
-  const filteredProducts = products.filter(product => 
-    product.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredCategories = categories.filter(category => 
+    category.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const getCategoryName = (product: ProductDetail) => {
-    return product.category?.name || 'Catégorie inconnue';
-  };
-
-  const getReportCount = (product: ProductDetail) => {
-    return product.rapports?.length || 0;
+  const getProductCount = (category: CategoryDetail) => {
+    return category.produits?.length || 0;
   };
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-      <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gradient-to-r from-emerald-50 to-teal-50">
+      <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
         <div className="flex items-center gap-2">
-          <Package className="h-6 w-6 text-emerald-600" />
-          <h1 className="text-2xl font-bold text-gray-800">Gestion des Produits</h1>
+          <Layers className="h-6 w-6 text-blue-600" />
+          <h1 className="text-2xl font-bold text-gray-800">Gestion des Catégories</h1>
         </div>
         <button
-          onClick={handleNewProduct}
-          className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-all duration-200 transform hover:scale-105 flex items-center gap-2 shadow-md"
+          onClick={handleNewCategory}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 flex items-center gap-2 shadow-md"
         >
           <PlusCircle className="h-5 w-5" />
-          Nouveau Produit
+          Nouvelle Catégorie
         </button>
       </div>
 
@@ -159,7 +150,7 @@ const ProductManagement = () => {
             placeholder="Rechercher par code ou nom..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors duration-200"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
           />
         </div>
 
@@ -169,54 +160,47 @@ const ProductManagement = () => {
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Code</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catégorie</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rapports</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produits</th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {isLoading && !products.length ? (
+              {isLoading && !categories.length ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center">
+                  <td colSpan={4} className="px-6 py-4 text-center">
                     <div className="flex items-center justify-center">
-                      <Loader2 className="h-6 w-6 animate-spin text-emerald-500" />
+                      <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
                       <span className="ml-2 text-gray-600">Chargement...</span>
                     </div>
                   </td>
                 </tr>
-              ) : filteredProducts.length === 0 ? (
+              ) : filteredCategories.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
-                    Aucun produit trouvé
+                  <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                    Aucune catégorie trouvée
                   </td>
                 </tr>
               ) : (
-                filteredProducts.map((product) => (
+                filteredCategories.map((category) => (
                   <tr 
-                    key={product.id} 
+                    key={category.id} 
                     className="hover:bg-gray-50 transition-colors duration-150"
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{product.code}</div>
+                      <div className="text-sm font-medium text-gray-900">{category.code}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{product.name}</div>
+                      <div className="text-sm text-gray-900">{category.name}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center text-sm text-gray-600">
-                        <Layers className="h-4 w-4 mr-2" />
-                        <span>{getCategoryName(product as ProductDetail)}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center text-sm text-gray-600">
-                        <FileText className="h-4 w-4 mr-2" />
-                        <span>{getReportCount(product as ProductDetail)} rapports</span>
+                        <Package className="h-4 w-4 mr-2" />
+                        <span>{getProductCount(category as CategoryDetail)} produits</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
                       <button
-                        onClick={() => handleEdit(product)}
+                        onClick={() => handleEdit(category)}
                         className="text-indigo-600 hover:text-indigo-900 mr-4 transition-colors duration-200 inline-flex items-center"
                         disabled={isLoading}
                       >
@@ -224,11 +208,11 @@ const ProductManagement = () => {
                         Modifier
                       </button>
                       <button
-                        onClick={() => handleDelete(product.id)}
+                        onClick={() => handleDelete(category.id)}
                         className="text-red-600 hover:text-red-900 transition-colors duration-200 inline-flex items-center"
-                        disabled={isDeleting === product.id}
+                        disabled={isDeleting === category.id}
                       >
-                        {isDeleting === product.id ? (
+                        {isDeleting === category.id ? (
                           <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                         ) : (
                           <Trash2 className="h-4 w-4 mr-1" />
@@ -250,7 +234,7 @@ const ProductManagement = () => {
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-bold text-gray-900">
-                  {currentProduct ? 'Modifier le produit' : 'Nouveau produit'}
+                  {currentCategory ? 'Modifier la catégorie' : 'Nouvelle catégorie'}
                 </h2>
                 <button
                   onClick={() => setIsModalOpen(false)}
@@ -268,8 +252,8 @@ const ProductManagement = () => {
                     value={formData.code}
                     onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
-                    placeholder="Code du produit"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    placeholder="Code de la catégorie"
                   />
                 </div>
                 <div>
@@ -279,23 +263,9 @@ const ProductManagement = () => {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
-                    placeholder="Nom du produit"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                    placeholder="Nom de la catégorie"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: Number(e.target.value) })}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-200"
-                  >
-                    <option value="">Sélectionnez une catégorie</option>
-                    {categories.map(category => (
-                      <option key={category.id} value={category.id}>{category.name}</option>
-                    ))}
-                  </select>
                 </div>
 
                 <div className="flex justify-end gap-3 mt-6">
@@ -309,11 +279,11 @@ const ProductManagement = () => {
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all duration-200 flex items-center"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center"
                     disabled={isLoading}
                   >
                     {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                    {currentProduct ? 'Modifier' : 'Créer'}
+                    {currentCategory ? 'Modifier' : 'Créer'}
                   </button>
                 </div>
               </form>
@@ -325,4 +295,4 @@ const ProductManagement = () => {
   );
 };
 
-export default ProductManagement;
+export default CategoryManagement;

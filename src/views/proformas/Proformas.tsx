@@ -1,310 +1,432 @@
-import React, { useState } from 'react';
-import { FileText, Plus, Search, Filter, Download, RefreshCw, SlidersHorizontal, Trash2, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { format } from 'date-fns';
-import { useProforma } from '@/contexts/ProformaProvider';
-import ProformasList from './ProformasList';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useServices } from '@/AppHooks';
+import { ProformaBase, ProformaDetail, ProformaEdit, OffreBase, ClientBase, EntityBase, DocumentStatus } from '@/interfaces';
+import { PlusCircle, Pencil, Trash2, X, AlertCircle, Loader2, FileText, Building2, Calendar, CheckCircle2, Clock, Send, XCircle } from 'lucide-react';
 
-type SortField = 'reference' | 'date_creation' | 'statut' | 'client';
-type SortOrder = 'asc' | 'desc';
+const getStatusLabel = (status: DocumentStatus): string => {
+  const statusLabels: Record<DocumentStatus, string> = {
+    'BROUILLON': 'Brouillon',
+    'ENVOYE': 'Envoyé',
+    'VALIDE': 'Validé',
+    'REFUSE': 'Refusé',
+    'EN_COURS': 'En cours',
+    'TERMINEE': 'Terminée',
+    'ANNULEE': 'Annulée'
+  };
+  return statusLabels[status] || status;
+};
 
-export function Proformas() {
+const getStatusIcon = (status: DocumentStatus) => {
+  switch (status) {
+    case 'BROUILLON':
+      return <Clock className="h-3 w-3 mr-1" />;
+    case 'ENVOYE':
+      return <Send className="h-3 w-3 mr-1" />;
+    case 'VALIDE':
+      return <CheckCircle2 className="h-3 w-3 mr-1" />;
+    case 'REFUSE':
+      return <XCircle className="h-3 w-3 mr-1" />;
+    case 'EN_COURS':
+      return <Clock className="h-3 w-3 mr-1" />;
+    case 'TERMINEE':
+      return <CheckCircle2 className="h-3 w-3 mr-1" />;
+    case 'ANNULEE':
+      return <X className="h-3 w-3 mr-1" />;
+    default:
+      return null;
+  }
+};
+
+const getStatusBadgeClass = (status: DocumentStatus): string => {
+  switch (status) {
+    case 'BROUILLON':
+      return 'bg-gray-100 text-gray-800';
+    case 'ENVOYE':
+      return 'bg-blue-100 text-blue-800';
+    case 'VALIDE':
+      return 'bg-green-100 text-green-800';
+    case 'REFUSE':
+      return 'bg-red-100 text-red-800';
+    case 'EN_COURS':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'TERMINEE':
+      return 'bg-emerald-100 text-emerald-800';
+    case 'ANNULEE':
+      return 'bg-gray-100 text-gray-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
+const ProformaManagement = () => {
+  const { proformaService, offreService, clientService, entityService } = useServices();
+  const [proformas, setProformas] = useState<ProformaBase[]>([]);
+  const [offres, setOffres] = useState<OffreBase[]>([]);
+  const [clients, setClients] = useState<ClientBase[]>([]);
+  const [entities, setEntities] = useState<EntityBase[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentProforma, setCurrentProforma] = useState<ProformaDetail | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [showFilters, setShowFilters] = useState(false);
-  const [sortConfig, setSortConfig] = useState<{field: SortField; order: SortOrder}>({
-    field: 'date_creation',
-    order: 'desc'
+  const [isDeleting, setIsDeleting] = useState<number | null>(null);
+
+  const [formData, setFormData] = useState<ProformaEdit>({
+    offre: 0,
+    client: 0,
+    entity: 0,
+    statut: 'BROUILLON',
+    doc_type: 'PRO',
+    sequence_number: 0
+
   });
 
-  const { proformas } = useProforma();
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [proformasData, offresData, clientsData, entitiesData] = await Promise.all([
+        proformaService.getAll(),
+        offreService.getAll(),
+        clientService.getAll(),
+        entityService.getAll()
+      ]);
+      setProformas(proformasData);
+      setOffres(offresData);
+      setClients(clientsData);
+      setEntities(entitiesData);
+    } catch (err) {
+      console.error(err);
+      setError('Erreur lors du chargement des données');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [proformaService, offreService, clientService, entityService]);
 
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-  const filteredProformas = React.useMemo(() => {
-    const filtered = proformas.filter(proforma => {
-      const matchesSearch = proforma.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           proforma.offre.client.nom.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = !statusFilter || proforma.statut === statusFilter;
-      const matchesDate = !dateFilter || isWithinDateRange(proforma.date_creation, dateFilter);
-      return matchesSearch && matchesStatus && matchesDate;
-    });
-
-    filtered.sort((a, b) => {
-      let comparison = 0;
-      switch (sortConfig.field) {
-        case 'reference':
-          comparison = a.reference.localeCompare(b.reference);
-          break;
-        case 'date_creation':
-          comparison = new Date(a.date_creation).getTime() - new Date(b.date_creation).getTime();
-          break;
-        case 'statut':
-          comparison = a.statut.localeCompare(b.statut);
-          break;
-        case 'client':
-          comparison = a.offre.client.nom.localeCompare(b.offre.client.nom);
-          break;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      if (currentProforma) {
+        console.log('Proforma updated:', formData);
+        await proformaService.update(currentProforma.id, formData);
+        
+      } else {
+        await proformaService.create(formData);
       }
-      return sortConfig.order === 'asc' ? comparison : -comparison;
-    });
-
-    return filtered;
-  }, [proformas, searchTerm, statusFilter, dateFilter, sortConfig]);
-
-  const isWithinDateRange = (date: string, range: string) => {
-    const today = new Date();
-    const dateToCheck = new Date(date);
-    
-    switch(range) {
-      case 'today':
-        return format(dateToCheck, 'yyyy-MM-dd') === format(today, 'yyyy-MM-dd');
-      case 'week':
-        { const weekAgo = new Date(today.setDate(today.getDate() - 7));
-        return dateToCheck >= weekAgo; }
-      case 'month':
-        { const monthAgo = new Date(today.setMonth(today.getMonth() - 1));
-        return dateToCheck >= monthAgo; }
-      default:
-        return true;
+      setIsModalOpen(false);
+      await loadData();
+      resetForm();
+    } catch (err) {
+      console.error(err);
+      setError('Erreur lors de la sauvegarde');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleRefresh = async () => {
-    setIsRefreshing(true);
-    // Ajoutez ici la logique de rafraîchissement
-    setTimeout(() => setIsRefreshing(false), 1000);
+  const handleEdit = async (proforma: ProformaBase) => {
+    setIsLoading(true);
+    try {
+      const detailedProforma = await proformaService.getById(proforma.id);
+      setCurrentProforma(detailedProforma);
+      setFormData({
+        offre: detailedProforma.offre.id,
+        client: detailedProforma.client.id,
+        entity: detailedProforma.entity.id,
+        statut: detailedProforma.statut,
+        doc_type: 'PRO',
+        sequence_number: 0
+      });
+      setIsModalOpen(true);
+    } catch (err) {
+      console.error(err);
+      setError('Erreur lors du chargement de la proforma');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleExport = () => {
-    const csvContent = [
-      ['Référence', 'Date de création', 'Statut', 'Client', 'Entité', 'Produits', 'Sites'],
-      ...filteredProformas.map(proforma => [
-        proforma.reference,
-        format(new Date(proforma.date_creation), 'dd/MM/yyyy'),
-        proforma.statut,
-        proforma.offre.client.nom,
-        proforma.offre.entity.name,
-        proforma.offre.produit.map(p => p.name).join('; '),
-        proforma.offre.sites.map(s => s.nom).join('; ')
-      ])
-    ].map(row => row.join(',')).join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `proformas_export_${format(new Date(), 'yyyy-MM-dd')}.csv`;
-    link.click();
+  const handleDelete = async (id: number) => {
+    setIsDeleting(id);
+    try {
+      await proformaService.delete(id);
+      await loadData();
+    } catch (err) {
+      console.error(err);
+      setError('Erreur lors de la suppression');
+    } finally {
+      setIsDeleting(null);
+    }
   };
 
-  const clearFilters = () => {
-    setSearchTerm('');
-    setStatusFilter('');
-    setDateFilter('');
+  const resetForm = () => {
+    setCurrentProforma(null);
+    setFormData({
+      offre: 0,
+      client: 0,
+      entity: 0,
+      statut: 'BROUILLON',
+      doc_type: 'PRO',
+      sequence_number: 0
+    });
+    setError(null);
+  };
+
+  const handleNewProforma = () => {
+    resetForm();
+    setIsModalOpen(true);
+  };
+
+  const filteredProformas = proformas.filter(proforma => 
+    proforma.reference.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   };
 
   return (
-    <div className="min-h-screen bg-gray-50/50 p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* En-tête */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <FileText className="w-6 h-6 text-gray-700" />
-              Gestion des Proformas
-            </h1>
-            <p className="text-gray-500 mt-1">
-              {filteredProformas.length} proforma{filteredProformas.length > 1 ? 's' : ''} au total
-            </p>
-          </div>
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gradient-to-r from-cyan-50 to-teal-50">
+        <div className="flex items-center gap-2">
+          <FileText className="h-6 w-6 text-cyan-600" />
+          <h1 className="text-2xl font-bold text-gray-800">Gestion des Proformas</h1>
+        </div>
+        <button
+          onClick={handleNewProforma}
+          className="bg-cyan-600 text-white px-4 py-2 rounded-lg hover:bg-cyan-700 transition-all duration-200 transform hover:scale-105 flex items-center gap-2 shadow-md"
+        >
+          <PlusCircle className="h-5 w-5" />
+          Nouvelle Proforma
+        </button>
+      </div>
 
-          <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRefresh}
-              className="gap-2"
+      {error && (
+        <div className="bg-red-50 border-l-4 border-red-500 text-red-700 p-4 m-4 animate-fadeIn">
+          <div className="flex items-center">
+            <AlertCircle className="h-5 w-5 text-red-400 mr-3" />
+            <p className="text-sm">{error}</p>
+            <button 
+              onClick={() => setError(null)}
+              className="ml-auto text-red-400 hover:text-red-500"
             >
-              <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              Actualiser
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExport}
-              className="gap-2"
-            >
-              <Download className="w-4 h-4" />
-              Exporter
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className="gap-2"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              Filtres
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              className="gap-2"
-            >
-              <Plus className="w-4 h-4" />
-              Nouvelle Proforma
-            </Button>
+              <X className="h-5 w-5" />
+            </button>
           </div>
         </div>
+      )}
 
-        {/* Statistiques rapides */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium text-gray-500">Total</div>
-              <div className="p-2 bg-gray-50 rounded-lg">
-                <FileText className="w-4 h-4 text-gray-400" />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-gray-900 mt-2">{proformas.length}</div>
-            <div className="text-xs text-gray-500 mt-1">Toutes les proformas</div>
-          </div>
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium text-gray-500">En cours</div>
-              <div className="p-2 bg-blue-50 rounded-lg">
-                <AlertCircle className="w-4 h-4 text-blue-400" />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-blue-600 mt-2">
-              {proformas.filter(p => p.statut === 'EN_COURS').length}
-            </div>
-            <div className="text-xs text-gray-500 mt-1">Proformas actives</div>
-          </div>
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium text-gray-500">Terminées</div>
-              <div className="p-2 bg-green-50 rounded-lg">
-                <CheckCircle2 className="w-4 h-4 text-green-400" />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-green-600 mt-2">
-              {proformas.filter(p => p.statut === 'TERMINE').length}
-            </div>
-            <div className="text-xs text-gray-500 mt-1">Proformas complétées</div>
-          </div>
-          <div className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-medium text-gray-500">Brouillons</div>
-              <div className="p-2 bg-gray-50 rounded-lg">
-                <FileText className="w-4 h-4 text-gray-400" />
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-gray-600 mt-2">
-              {proformas.filter(p => p.statut === 'BROUILLON').length}
-            </div>
-            <div className="text-xs text-gray-500 mt-1">En préparation</div>
-          </div>
+      <div className="p-4">
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Rechercher par référence..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-colors duration-200"
+          />
         </div>
 
-        {/* Filtres */}
-        <div className={`bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-300 ${showFilters ? 'max-h-96' : 'max-h-0'}`}>
-          <div className="p-4 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                <Filter className="w-4 h-4" />
-                Filtres et tri
-              </h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={clearFilters}
-                className="gap-2 text-gray-500 hover:text-gray-700"
-              >
-                <Trash2 className="w-4 h-4" />
-                Réinitialiser
-              </Button>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Rechercher..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 pr-4 py-2 w-full rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all"
-                />
-              </div>
-              
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full h-10 pl-9 pr-8 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none bg-white"
-              >
-                <option value="">Tous les statuts</option>
-                <option value="EN_COURS">En cours</option>
-                <option value="TERMINE">Terminé</option>
-                <option value="BROUILLON">Brouillon</option>
-              </select>
-
-              <select
-                value={dateFilter}
-                onChange={(e) => setDateFilter(e.target.value)}
-                className="w-full h-10 pl-9 pr-8 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none bg-white"
-              >
-                <option value="">Toutes les dates</option>
-                <option value="today">Aujourd'hui</option>
-                <option value="week">7 derniers jours</option>
-                <option value="month">30 derniers jours</option>
-              </select>
-
-              <select
-                value={`${sortConfig.field}-${sortConfig.order}`}
-                onChange={(e) => {
-                  const [field, order] = e.target.value.split('-') as [SortField, SortOrder];
-                  setSortConfig({ field, order });
-                }}
-                className="w-full h-10 pl-9 pr-8 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-blue-100 focus:border-blue-400 transition-all appearance-none bg-white"
-              >
-                <option value="date_creation-desc">Date (récent)</option>
-                <option value="date_creation-asc">Date (ancien)</option>
-                <option value="reference-asc">Référence (A-Z)</option>
-                <option value="reference-desc">Référence (Z-A)</option>
-                <option value="client-asc">Client (A-Z)</option>
-                <option value="client-desc">Client (Z-A)</option>
-                <option value="statut-asc">Statut (A-Z)</option>
-                <option value="statut-desc">Statut (Z-A)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Liste des proformas */}
-        <div className=" rounded-xl  shadow-sm">
-          {filteredProformas.length > 0 ? (
-            <ProformasList proformas={filteredProformas} />
-          ) : (
-            <div className="p-12 text-center">
-              <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune proforma trouvée</h3>
-              <p className="text-gray-500 max-w-md mx-auto">
-                Aucune proforma ne correspond à vos critères de recherche. Essayez de modifier vos filtres ou d'effectuer une nouvelle recherche.
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={clearFilters}
-                className="mt-4"
-              >
-                Réinitialiser les filtres
-              </Button>
-            </div>
-          )}
+        <div className="overflow-x-auto rounded-lg border border-gray-200">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Référence</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Création</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {isLoading && !proformas.length ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-4 text-center">
+                    <div className="flex items-center justify-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-cyan-500" />
+                      <span className="ml-2 text-gray-600">Chargement...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredProformas.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                    Aucune proforma trouvée
+                  </td>
+                </tr>
+              ) : (
+                filteredProformas.map((proforma) => (
+                  <tr 
+                    key={proforma.id} 
+                    className="hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{proforma.reference}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center text-sm text-gray-600">
+                        <Building2 className="h-4 w-4 mr-2" />
+                        <span>{(proforma as ProformaDetail).client?.nom || 'Client inconnu'}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center text-sm text-gray-600">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        <span>{formatDate(proforma.date_creation)}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(proforma.statut)}`}>
+                        {getStatusIcon(proforma.statut)}
+                        {getStatusLabel(proforma.statut)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
+                      <button
+                        onClick={() => handleEdit(proforma)}
+                        className="text-indigo-600 hover:text-indigo-900 mr-4 transition-colors duration-200 inline-flex items-center"
+                        disabled={isLoading}
+                      >
+                        <Pencil className="h-4 w-4 mr-1" />
+                        Modifier
+                      </button>
+                      <button
+                        onClick={() => handleDelete(proforma.id)}
+                        className="text-red-600 hover:text-red-900 transition-colors duration-200 inline-flex items-center"
+                        disabled={isDeleting === proforma.id}
+                      >
+                        {isDeleting === proforma.id ? (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-4 w-4 mr-1" />
+                        )}
+                        Supprimer
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-white rounded-xl w-full max-w-2xl transform transition-all duration-200 animate-slideIn">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-bold text-gray-900">
+                  {currentProforma ? 'Modifier la proforma' : 'Nouvelle proforma'}
+                </h2>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-500 transition-colors duration-200"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Offre</label>
+                    <select
+                      value={formData.offre}
+                      onChange={(e) => setFormData({ ...formData, offre: Number(e.target.value) })}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200"
+                    >
+                      <option value="">Sélectionnez une offre</option>
+                      {offres.map(offre => (
+                        <option key={offre.id} value={offre.id}>{offre.reference}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Client</label>
+                    <select
+                      value={formData.client}
+                      onChange={(e) => setFormData({ ...formData, client: Number(e.target.value) })}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200"
+                    >
+                      <option value="">Sélectionnez un client</option>
+                      {clients.map(client => (
+                        <option key={client.id} value={client.id}>{client.nom}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Entité</label>
+                    <select
+                      value={formData.entity}
+                      onChange={(e) => setFormData({ ...formData, entity: Number(e.target.value) })}
+                      required
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200"
+                    >
+                      <option value="">Sélectionnez une entité</option>
+                      {entities.map(entity => (
+                        <option key={entity.id} value={entity.id}>{entity.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+                    <select
+                      value={formData.statut}
+                      onChange={(e) => setFormData({ ...formData, statut: e.target.value as DocumentStatus })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200"
+                    >
+                      <option value="BROUILLON">Brouillon</option>
+                      <option value="ENVOYE">Envoyé</option>
+                      <option value="VALIDE">Validé</option>
+                      <option value="REFUSE">Refusé</option>
+                      <option value="EN_COURS">En cours</option>
+                      <option value="TERMINEE">Terminée</option>
+                      <option value="ANNULEE">Annulée</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200"
+                    disabled={isLoading}
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-all duration-200 flex items-center"
+                    disabled={isLoading}
+                  >
+                    {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    {currentProforma ? 'Modifier' : 'Créer'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};
+
+export default ProformaManagement;

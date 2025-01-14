@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { IClient } from '../types';
+import { IClient } from '../interfaces';
 
 const CLIENT_API = 'http://192.168.1.160:8008/clients/';
 

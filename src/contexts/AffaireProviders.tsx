@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useMemo, useState, useContext, useCallback, createContext, useEffect } from 'react';
 import { AffaireService } from '../services/affaire.service';
-import { IAffaire, IAffaireC } from '../types';
+import { IAffaire, IAffaireC } from '../interfaces';
 
 interface AffaireContextType {
     affaires: IAffaire[];

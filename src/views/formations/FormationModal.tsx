@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { X, AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useAffaire } from '@/contexts/AffaireProviders';
-import { IAffaire, IFormation, IProduct } from '@/types';
+import { IAffaire, IFormation, IProduct } from '@/interfaces';
 
 interface FormationModalProps {
   formation: IFormation | null;

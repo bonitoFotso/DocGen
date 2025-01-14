@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Search, Calendar, Building2, User2, Tag, Clock, ChevronDown, FileText, ArrowLeft, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
-import { IOffre } from '../../types';
+import { IOffre } from '../../interfaces';
 import OfferDetails from './OfferDetails'; // Importez le composant OfferDetails
 
 interface OffersListProps {

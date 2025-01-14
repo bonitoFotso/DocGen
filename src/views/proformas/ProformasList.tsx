@@ -3,7 +3,7 @@ import { FileText, ChevronRight, Tag, Building2, MapPin, Package, CheckCircle2, 
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
-import { IProforma } from '@/types';
+import { IProforma } from '@/interfaces';
 
 
 interface ProformasListProps {

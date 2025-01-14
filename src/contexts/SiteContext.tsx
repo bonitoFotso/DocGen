@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { useMemo, useState, useContext, useCallback, createContext, useEffect } from 'react';
 
 import { SiteService } from '../services/site.service';
-import { ISite, ISiteC } from '../types';
+import { ISite, ISiteC } from '../interfaces';
 
 
 interface SiteContextType {

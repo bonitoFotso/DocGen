@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Package, ChevronRight, Tag, Building2, Folder, GraduationCap } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ICategory } from '@/types';
+import { ICategory } from '@/interfaces';
 
 
 

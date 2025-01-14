@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, useMemo, ReactNode, useEffect } from 'react';
-import { IRapport, DocumentStatus } from '../types';
+import { IRapport, DocumentStatus } from '../interfaces.ts';
 import { RapportService } from '../services/rapport.service.ts';
 
 interface RapportContextType {

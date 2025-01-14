@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Package, ChevronRight, Tag, Building2, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { IProduct } from '@/types';
+import { IProduct } from '@/interfaces';
 
 
 interface ProductListProps {

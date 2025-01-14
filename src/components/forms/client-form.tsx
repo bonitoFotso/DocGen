@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FormField } from './form-field';
-import type { IClient } from '../../types';
+import type { IClient } from '../../interfaces';
 import { useClient } from '../../contexts/ClientContext';
 import { useModal } from '../../hooks/useModal';
 
