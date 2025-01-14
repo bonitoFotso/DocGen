@@ -7,7 +7,7 @@ import type {
 
 import axios from 'axios';
 
-const HABILITATION_API = 'http://localhost:8001/api/habilitations';
+const HABILITATION_API = 'http://192.168.1.160:8001/api/habilitations';
 
 export const HabilitationService = {
   // Habilitations électriques

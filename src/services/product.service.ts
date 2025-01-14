@@ -3,7 +3,7 @@
 import { IProduct } from '../types';
 import axios from 'axios';
 
-const BASE_URL = 'http://localhost:8008/products'; // Modifiez cette URL selon votre backend
+const BASE_URL = 'http://192.168.1.160:8008/products'; // Modifiez cette URL selon votre backend
 
 export const ProductService = {
   async getAll(): Promise<IProduct[]> {

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { IOffre, IOffreC } from '../types';
 
-const OFFRE_API = 'http://localhost:8008/offres/';
+const OFFRE_API = 'http://192.168.1.160:8008/offres/';
 
 export const OffreService = {
   getAll: async (): Promise<IOffre[]> => {

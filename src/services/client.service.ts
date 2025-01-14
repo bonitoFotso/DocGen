@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { IClient } from '../types';
 
-const CLIENT_API = 'http://localhost:8008/clients/';
+const CLIENT_API = 'http://192.168.1.160:8008/clients/';
 
 export const ClientService = {
   getAll: async (): Promise<IClient[]> => {

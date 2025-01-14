@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { IFacture, DocumentStatus } from '../types';
 
-const API_URL = 'http://localhost:8008/factures/'; // Remplacez par l'URL de votre backend
+const API_URL = 'http://192.168.1.160:8008/factures/'; // Remplacez par l'URL de votre backend
 
 export const FactureService = {
   /**

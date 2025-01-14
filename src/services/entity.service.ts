@@ -1,7 +1,7 @@
 import { IEntity } from '../types';
 import axios from 'axios';
 
-const baseUrl = 'http://localhost:8008/entities';  // Remplacez par l'URL de votre API
+const baseUrl = 'http://192.168.1.160:8008/entities';  // Remplacez par l'URL de votre API
 
 export class EntityService {
   // Récupérer toutes les entités

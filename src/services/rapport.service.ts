@@ -1,7 +1,7 @@
 import { IRapport } from '../types';
 import axios from 'axios';
 
-const baseUrl = 'http://localhost:8008/rapports';  // Remplacez par l'URL de votre API
+const baseUrl = 'http://192.168.1.160:8008/rapports';  // Remplacez par l'URL de votre API
 
 export class RapportService {
   // Récupérer tous les rapports

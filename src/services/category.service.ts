@@ -3,7 +3,7 @@
 import axios from 'axios';
 import { ICategory } from '../types';
 
-const BASE_URL = 'http://localhost:8008/categories'; // Changez cette URL selon votre backend
+const BASE_URL = 'http://192.168.1.160:8008/categories'; // Changez cette URL selon votre backend
 
 export const CategoryService = {
   async getAll(): Promise<ICategory[]> {

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { DocumentStatus, IAttestationFormation } from '../types';
 
-const baseUrl = 'http://localhost:8001/attestation-formations';  // Remplacez par l'URL de votre API
+const baseUrl = 'http://192.168.1.160:8001/attestation-formations';  // Remplacez par l'URL de votre API
 
 export class AttestationFormationService {
   // Récupérer toutes les attestations de formation

@@ -2,7 +2,7 @@ import { apiClient } from './api';
 import { ISite, ISiteC } from '../types';
 
 
-const SITE_API = 'http://localhost:8008/sites/';
+const SITE_API = 'http://192.168.1.160:8008/sites/';
 
 export const SiteService = {
   // Récupérer tous les sites

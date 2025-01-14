@@ -5,7 +5,7 @@ import { IFormation } from '../types';
 
 
 
-const FORMATION_API = 'http://localhost:8008/formations/';
+const FORMATION_API = 'http://192.168.1.160:8008/formations/';
 
 export const FormationService = {
   // Récupérer toutes les formations
