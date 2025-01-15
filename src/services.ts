@@ -17,7 +17,7 @@ import type {
 } from './interfaces';
 import { AffaireDetails } from './affaireType';
 
-const API_URL =  'http://localhost:8008';
+const API_URL =  'http://192.168.1.114:8008';
 
 const api = axios.create({
   baseURL: API_URL,

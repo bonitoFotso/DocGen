@@ -23,7 +23,7 @@ const navigation = [
   
   
   { name: 'Products', href: '/products', icon: Package },
-  { name: 'Documents', href: '/documents', icon: FileText },
+  
   { name: 'Formations', href: '/formations', icon: GraduationCap },
 ];
 
