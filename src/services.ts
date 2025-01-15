@@ -15,6 +15,7 @@ import type {
   AttestationFormationBase, AttestationFormationDetail, AttestationFormationEdit,
   ProformaEditStatus,
 } from './interfaces';
+import { AffaireDetails } from './affaireType';
 
 const API_URL =  'http://localhost:8008';
 
@@ -219,6 +220,10 @@ export const affaireService = {
   },
   getById: async (id: number) => {
     const { data } = await api.get<AffaireDetail>(`/affaires/${id}/`);
+    return data;
+  },
+  details: async (id: number) => {
+    const { data } = await api.get<AffaireDetails>(`/affaires/${id}/details_complets`);
     return data;
   },
   create: async (affaire: AffaireEdit) => {

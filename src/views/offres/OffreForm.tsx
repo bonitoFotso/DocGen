@@ -173,9 +173,10 @@ export const OffreForm: React.FC<OffreFormProps> = ({
             <div className="flex flex-wrap gap-2">
               {categories.map((category) => (
                 <button
-                type="button"
+                
                   key={category.id}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.preventDefault()
                     setSelectedCategories(prev =>
                       prev.includes(category.id)
                         ? prev.filter(id => id !== category.id)
