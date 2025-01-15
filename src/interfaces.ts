@@ -45,6 +45,7 @@ interface SiteBase extends BaseModel {
   nom: string;
   localisation: string;
   client_nom: string;
+  clientId: number;
 }
 
 interface SiteDetail extends SiteBase {
@@ -71,15 +72,18 @@ interface CategoryDetail extends CategoryBase {
 }
 
 interface CategoryEdit {
-  code?: string;
-  name?: string;
-  entity?: number;
+  code: string;
+  name: string;
+  entity: number;
 }
 
 // Product Interfaces
 interface ProductBase extends BaseModel {
   code: string;
   name: string;
+  category_name: string;
+  categoryId?: number;
+
 }
 
 interface ProductDetail extends ProductBase {
@@ -112,6 +116,7 @@ interface OffreBase extends DocumentBase {
 }
 
 interface OffreDetail extends OffreBase {
+  client_nom: string;
   produit: ProductBase[];
   sites: SiteBase[];
   client: ClientBase;
@@ -126,6 +131,10 @@ interface OffreEdit {
   produit: number[];
   sites: number[];
   statut: DocumentStatus;
+  doc_type: string;
+}
+interface OffreEditStatus {
+  statut: DocumentStatus;
 }
 
 // Proforma Interfaces
@@ -134,6 +143,8 @@ interface ProformaBase extends DocumentBase {
 }
 
 interface ProformaDetail extends ProformaBase {
+  date_modification: string;
+  client_nom: string;
   client: ClientBase;
   entity: EntityBase;
   affaire: AffaireBase;
@@ -148,6 +159,9 @@ interface ProformaEdit {
   sequence_number: number;
 }
 
+interface ProformaEditStatus {
+  status: DocumentStatus;
+}
 // Affaire status type
 type AffaireStatus = 'EN_COURS' | 'TERMINEE' | 'ANNULEE';
 
@@ -308,5 +322,5 @@ export type {
   ParticipantBase, ParticipantDetail, ParticipantEdit,
   AttestationFormationBase, AttestationFormationDetail, AttestationFormationEdit,
   PaginatedResponse, ApiResponse,
-  DocumentStatus, AffaireStatus
+  DocumentStatus, AffaireStatus, OffreEditStatus, ProformaEditStatus
 };

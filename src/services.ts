@@ -13,6 +13,7 @@ import type {
   FormationBase, FormationDetail, FormationEdit,
   ParticipantBase, ParticipantDetail, ParticipantEdit,
   AttestationFormationBase, AttestationFormationDetail, AttestationFormationEdit,
+  ProformaEditStatus,
 } from './interfaces';
 
 const API_URL =  'http://localhost:8008';
@@ -191,6 +192,10 @@ export const proformaService = {
   },
   create: async (proforma: ProformaEdit) => {
     const { data } = await api.post<ProformaDetail>('/proformas/', proforma);
+    return data;
+  },
+  change_status: async (id: number, proforma: ProformaEditStatus) => {
+    const { data } = await api.post<ProformaDetail>(`/proformas/${id}/change_status/`, proforma);
     return data;
   },
   update: async (id: number, proforma: Partial<ProformaEdit>) => {

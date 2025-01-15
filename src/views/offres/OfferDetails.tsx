@@ -1,176 +1,116 @@
 import React from 'react';
-import { 
-  Building2, 
-  MapPin, 
-  Package, 
-  Users,
-  Phone,
-  Mail,
-  MapPinned,
-  FileText,
-  Calendar,
-} from 'lucide-react';
-import { format } from 'date-fns';
-import { fr } from 'date-fns/locale';
-import { IOffre } from '@/interfaces';
-import { cn } from '@/lib/utils';
+import { OffreDetail } from '@/interfaces';
+import { X, Building2, Package, MapPin, Calendar, Pencil, Trash2, Loader2 } from 'lucide-react';
+import { formatDate } from '@/utils/dateHelpers';
+import { getStatusBadgeClass, getStatusIcon, getStatusLabel } from '@/utils/statusHelpers';
 
-interface OfferDetailsProps {
-  offer: IOffre;
-  expanded?: boolean;
+interface OffreDetailsProps {
+  offre: OffreDetail;
+  onClose: () => void;
+  onEdit: (offre: OffreDetail) => void;
+  onDelete: (id: number) => void;
+  isDeleting: number | null;
 }
 
-const OfferDetails: React.FC<OfferDetailsProps> = ({ offer, expanded = false }) => {
+export const OffreDetails: React.FC<OffreDetailsProps> = ({
+  offre,
+  onClose,
+  onEdit,
+  onDelete,
+  isDeleting,
+}) => {
   return (
-    <div className={cn(
-      "grid gap-6",
-      expanded ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-3",
-      "p-6"
-    )}>
-      {/* Informations principales */}
-      <div className="space-y-4">
-        <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-          <FileText className="w-4 h-4 text-gray-500" />
-          Informations générales
-        </h4>
-        <div className="space-y-3">
-          <div className="p-4 rounded-lg bg-gray-50/50 border border-gray-100 hover:bg-gray-50 transition-colors">
-            <span className="text-xs font-medium text-gray-500 flex items-center gap-1.5 mb-1">
-              <Calendar className="w-3.5 h-3.5" />
-              Dates
-            </span>
-            <div className="space-y-2">
-              <div>
-                <p className="text-xs text-gray-500">Création</p>
-                <p className="text-sm font-medium text-gray-900">
-                  {format(new Date(offer.date_creation), 'dd MMMM yyyy', { locale: fr })}
-                </p>
+    <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50">
+      <div className="absolute inset-y-0 right-0 w-full max-w-xl bg-white shadow-xl transform transition-transform duration-300 ease-in-out">
+        <div className="h-full flex flex-col">
+          {/* Header */}
+          <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-gray-900">Détails de l'offre</h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-500 transition-colors"
+            >
+              <X className="h-6 w-6" />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <div className="space-y-6">
+              {/* Reference */}
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <h3 className="text-xl font-semibold text-purple-900 mb-2">{offre.reference}</h3>
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(
+                    offre.statut
+                  )}`}
+                >
+                  {getStatusIcon(offre.statut)}
+                  {getStatusLabel(offre.statut)}
+                </span>
               </div>
-              {offer.date_modification && (
-                <div>
-                  <p className="text-xs text-gray-500">Dernière modification</p>
-                  <p className="text-sm font-medium text-gray-900">
-                    {format(new Date(offer.date_modification), 'dd MMMM yyyy', { locale: fr })}
-                  </p>
-                </div>
-              )}
-              {offer.date_validation && (
-                <div>
-                  <p className="text-xs text-gray-500">Validation</p>
-                  <p className="text-sm font-medium text-gray-900">
-                    {format(new Date(offer.date_validation), 'dd MMMM yyyy', { locale: fr })}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
 
-          <div className="p-4 rounded-lg bg-gray-50/50 border border-gray-100 hover:bg-gray-50 transition-colors">
-            <span className="text-xs font-medium text-gray-500 flex items-center gap-1.5 mb-1">
-              <Building2 className="w-3.5 h-3.5" />
-              Entité
-            </span>
-            <p className="text-sm font-medium text-gray-900">{offer.entity.name}</p>
-            <p className="text-xs text-gray-500 mt-1">Code: {offer.entity.code}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Client */}
-      <div className="space-y-4">
-        <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-          <Users className="w-4 h-4 text-gray-500" />
-          Informations client
-        </h4>
-        <div className="p-4 rounded-lg bg-gray-50/50 border border-gray-100 space-y-4">
-          <div>
-            <span className="text-xs font-medium text-gray-500 flex items-center gap-1.5 mb-1">
-              <Users className="w-3.5 h-3.5" />
-              Client
-            </span>
-            <p className="text-sm font-medium text-gray-900">{offer.client.nom}</p>
-          </div>
-
-          {offer.client.email && (
-            <div>
-              <span className="text-xs font-medium text-gray-500 flex items-center gap-1.5 mb-1">
-                <Mail className="w-3.5 h-3.5" />
-                Email
-              </span>
-              <p className="text-sm text-gray-900">{offer.client.email}</p>
-            </div>
-          )}
-
-          {offer.client.telephone && (
-            <div>
-              <span className="text-xs font-medium text-gray-500 flex items-center gap-1.5 mb-1">
-                <Phone className="w-3.5 h-3.5" />
-                Téléphone
-              </span>
-              <p className="text-sm text-gray-900">{offer.client.telephone}</p>
-            </div>
-          )}
-
-          {offer.client.adresse && (
-            <div>
-              <span className="text-xs font-medium text-gray-500 flex items-center gap-1.5 mb-1">
-                <MapPinned className="w-3.5 h-3.5" />
-                Adresse
-              </span>
-              <p className="text-sm text-gray-900">{offer.client.adresse}</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Produits et Sites */}
-      <div className="space-y-6">
-        {/* Produits */}
-        <div className="space-y-4">
-          <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-            <Package className="w-4 h-4 text-gray-500" />
-            Produits ({offer.produit.length})
-          </h4>
-          <div className="space-y-2">
-            {offer.produit.map((product) => (
-              <div
-                key={product.id}
-                className="p-3 bg-white rounded-lg border border-gray-100 hover:border-blue-100 hover:shadow-sm transition-all"
+              {/* Sections */}
+              <DetailSection
+                icon={<Building2 className="h-5 w-5 text-gray-400" />}
+                title="Information Client"
               >
-                <p className="text-sm font-medium text-gray-900">{product.name}</p>
-                <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-1">
-                  <Package className="w-3 h-3" />
-                  {product.code}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
+                <p className="text-gray-600">{offre.client.nom}</p>
+                <p className="text-sm text-gray-500">Entité: {offre.entity.name}</p>
+              </DetailSection>
 
-        {/* Sites */}
-        <div className="space-y-4">
-          <h4 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-gray-500" />
-            Sites d'intervention ({offer.sites.length})
-          </h4>
-          <div className="space-y-2">
-            {offer.sites.map((site) => (
-              <div
-                key={site.id}
-                className="p-3 bg-white rounded-lg border border-gray-100 hover:border-blue-100 hover:shadow-sm transition-all"
-              >
-                <p className="text-sm font-medium text-gray-900">{site.nom}</p>
-                {site.localisation && (
-                  <p className="text-xs text-gray-500 flex items-center gap-1.5 mt-1">
-                    <MapPin className="w-3 h-3" />
-                    {site.localisation}
-                  </p>
-                )}
-                {site.description && (
-                  <p className="text-xs text-gray-500 mt-1">{site.description}</p>
-                )}
-              </div>
-            ))}
+              <DetailSection icon={<Package className="h-5 w-5 text-gray-400" />} title="Produits">
+                <ul className="space-y-2">
+                  {offre.produit.map((product) => (
+                    <li key={product.id} className="flex items-center gap-2 text-gray-600">
+                      <span className="w-2 h-2 bg-purple-400 rounded-full" />
+                      {product.name}
+                    </li>
+                  ))}
+                </ul>
+              </DetailSection>
+
+              <DetailSection icon={<MapPin className="h-5 w-5 text-gray-400" />} title="Sites">
+                <ul className="space-y-2">
+                  {offre.sites.map((site) => (
+                    <li key={site.id} className="flex items-center gap-2 text-gray-600">
+                      <span className="w-2 h-2 bg-indigo-400 rounded-full" />
+                      {site.nom}
+                    </li>
+                  ))}
+                </ul>
+              </DetailSection>
+
+              <DetailSection icon={<Calendar className="h-5 w-5 text-gray-400" />} title="Dates">
+                <div className="space-y-2 text-sm text-gray-600">
+                  <p>Créé le: {formatDate(offre.date_creation)}</p>
+                  <p>Dernière modification: {formatDate(offre.date_modification)}</p>
+                </div>
+              </DetailSection>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex justify-end gap-3">
+            <button
+              onClick={() => onEdit(offre)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all duration-200"
+            >
+              <Pencil className="h-4 w-4" />
+              Modifier
+            </button>
+            <button
+              onClick={() => onDelete(offre.id)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded-lg text-red-600 hover:bg-red-100 transition-all duration-200"
+              disabled={isDeleting === offre.id}
+            >
+              {isDeleting === offre.id ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Trash2 className="h-4 w-4" />
+              )}
+              Supprimer
+            </button>
           </div>
         </div>
       </div>
@@ -178,4 +118,16 @@ const OfferDetails: React.FC<OfferDetailsProps> = ({ offer, expanded = false }) 
   );
 };
 
-export default OfferDetails;
+const DetailSection: React.FC<{
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}> = ({ icon, title, children }) => (
+  <div className="border-b pb-4">
+    <div className="flex items-center gap-2 mb-4">
+      {icon}
+      <h4 className="font-medium text-gray-900">{title}</h4>
+    </div>
+    {children}
+  </div>
+);

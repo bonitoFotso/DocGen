@@ -22,6 +22,7 @@ const SiteManagement = () => {
   });
 
   const loadData = useCallback(async () => {
+    console.log('Loading data site ');
     setIsLoading(true);
     try {
       const [sitesData, clientsData] = await Promise.all([

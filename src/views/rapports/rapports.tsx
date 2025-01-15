@@ -103,7 +103,7 @@ export function Rapports() {
         rapport.client.nom,
         rapport.entity.name,
         rapport.produit.name,
-        rapport.site.nom
+        rapport.site_nom
       ])
     ].map(row => row.join(',')).join('\n');
 
